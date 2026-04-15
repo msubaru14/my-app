@@ -1,33 +1,35 @@
 package main
 
 import (
-	"net/http"
+	"log"
 
-	"my-app-backend/db"
-	"my-app-backend/models"
-
-	"github.com/gin-gonic/gin"
+	"github.com/msubaru14/my-app-backend/controller"
+	"github.com/msubaru14/my-app-backend/db"
+	"github.com/msubaru14/my-app-backend/model"
+	"github.com/msubaru14/my-app-backend/repository"
+	"github.com/msubaru14/my-app-backend/router"
+	"github.com/msubaru14/my-app-backend/service"
 )
 
 func main() {
-	database, _ := db.Connect()
+	database, err := db.Connect()
+	if err != nil {
+		log.Fatal("DB接続失敗")
+	}
 
-	database.AutoMigrate(&models.User{})
+	// マイグレーション
+	database.AutoMigrate(&model.User{})
 
-	r := gin.Default()
+	// DI（依存注入）
+	userRepo := &repository.UserRepository{DB: database}
+	userService := &service.UserService{Repo: userRepo}
+	userController := &controller.UserController{Service: userService}
 
-	r.GET("/users", func(c *gin.Context) {
-		var users []models.User
-		database.Find(&users)
-		c.JSON(http.StatusOK, users)
-	})
+	authService := &service.AuthService{Repo: userRepo}
+	authController := &controller.AuthController{Service: authService}
 
-	r.POST("/users", func(c *gin.Context) {
-		var user models.User
-		c.ShouldBindJSON(&user)
-		database.Create(&user)
-		c.JSON(200, user)
-	})
+	// ルーティング
+	r := router.SetupRouter(userController, authController)
 
 	r.Run(":8080")
 }
