@@ -6,12 +6,14 @@ dist/
 bin/
 tmp/
 *.exe
+*.out
 
 # Env
 .env
 
 # Docker
 *.log
+.env.local
 
 # OS
 .DS_Store
@@ -19,3 +21,6 @@ tmp/
 # IDE
 .vscode/
 .idea/
+
+# Windows
+Thumbs.db
