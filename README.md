@@ -32,6 +32,20 @@ React + Go + PostgreSQL + Dockerで構築した個人用Webアプリです。
 - Go: 高速でシンプルなバックエンド開発を体験するため
 - Docker: 環境構築を統一し、再現性を高めるため
 
+
+## 🏗 アーキテクチャ
+
+- Controller: リクエスト受付
+- Service: ビジネスロジック
+- Repository: DB操作
+
+
+## 🔐 認証
+
+- JWTを使用
+- Authorizationヘッダーで認証
+
+
 ## 📂 ディレクトリ構成
 ```
 .
@@ -47,7 +61,7 @@ React + Go + PostgreSQL + Dockerで構築した個人用Webアプリです。
 
 ## 🚧 今後の予定
 
-- ログイン機能（JWT）
+- フロントエンドとの連携
 - UI改善
 
 ---
@@ -75,13 +89,16 @@ docker compose up --build
 - Backend: http://localhost:8080
 
 ## 📌 機能
-- ユーザー一覧取得
-- ユーザー作成
+- ユーザー登録
+- ログイン（JWT認証）
+- ユーザー一覧取得（認証必須）
 
 ## 🧠 学んだこと
-- Dockerでのフルスタック環境構築
-- Go + GinでのAPI開発
-- Reactとの連携
+- レイヤードアーキテクチャでのAPI設計
+- JWT認証の実装とミドルウェアによる認可制御
+- Dockerを用いたフルスタック環境構築
+- ReactとAPIの連携方法
+
 
 ## 📄 ライセンス
 MIT

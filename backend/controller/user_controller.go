@@ -18,7 +18,7 @@ type UserController struct {
 func (uc *UserController) GetUsers(c *gin.Context) {
 	users, err := uc.Service.GetUsers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "取得失敗"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid request"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -45,12 +45,11 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	createdUser, err := uc.Service.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "作成失敗"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "ユーザー作成成功",
-		"user":    createdUser,
+		"user": createdUser,
 	})
 }
