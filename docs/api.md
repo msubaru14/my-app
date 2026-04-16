@@ -34,6 +34,19 @@ http://localhost:8080
 }
 ```
 
+```json
+{
+  "error": "invalid request"
+}
+```
+
+#### バリデーション
+
+name: 必須
+email: 必須 / 形式チェック
+password: 6文字以上
+
+
 #### ステータスコード
 
 * 201: 成功
@@ -62,6 +75,17 @@ http://localhost:8080
   "token": "JWTトークン"
 }
 ```
+
+```json
+{
+  "error": "invalid request"
+}
+```
+
+#### バリデーション
+
+email: 必須 / 形式チェック
+password: 6文字以上
 
 #### ステータスコード
 
@@ -95,6 +119,12 @@ Authorization: Bearer {token}
 }
 ```
 
+```json
+{
+  "error": "invalid request"
+}
+```
+
 #### ステータスコード
 
 * 200: 成功
@@ -120,6 +150,12 @@ Authorization: Bearer {token}
   "id": 1,
   "name": "string",
   "email": "string"
+}
+```
+
+```json
+{
+  "error": "invalid request"
 }
 ```
 
