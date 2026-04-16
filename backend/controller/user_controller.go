@@ -18,12 +18,11 @@ type UserController struct {
 func (uc *UserController) GetUsers(c *gin.Context) {
 	users, err := uc.Service.GetUsers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid request"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "ユーザー一覧取得成功",
-		"users":   users,
+		"users": users,
 	})
 }
 
@@ -52,4 +51,21 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"user": createdUser,
 	})
+}
+
+// ログインユーザ取得
+func (uc *UserController) GetMe(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	user, err := uc.Service.GetByID(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }

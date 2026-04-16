@@ -22,6 +22,7 @@ func SetupRouter(
 	auth.Use(middleware.AuthMiddleware())
 
 	auth.GET("/users", userController.GetUsers)
+	auth.GET("/me", userController.GetMe)
 
 	return r
 }
