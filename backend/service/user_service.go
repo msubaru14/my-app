@@ -26,3 +26,8 @@ func (s *UserService) CreateUser(user model.User) (*model.User, error) {
 
 	return s.Repo.Create(&user)
 }
+
+// ログインユーザ取得
+func (s *UserService) GetByID(id uint) (*model.User, error) {
+	return s.Repo.FindByID(id)
+}
