@@ -55,14 +55,6 @@ React + Go + PostgreSQL + Dockerで構築した個人用Webアプリです。
 ```
 .
 ├── backend
-│   ├── db
-│   └── models
-├── db
-└── frontend
-    ├── public
-    └── src
-
-├── backend
 │  ├── controller
 │  ├── db
 │  ├── dto
