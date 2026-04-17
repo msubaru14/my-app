@@ -12,6 +12,7 @@ import (
 func SetupRouter(
 	userController *controller.UserController,
 	authController *controller.AuthController,
+	taskController *controller.TaskController,
 ) *gin.Engine {
 
 	r := gin.Default()
