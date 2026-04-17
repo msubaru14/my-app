@@ -67,5 +67,11 @@ func (uc *UserController) GetMe(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	res := dto.UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+
+	c.JSON(http.StatusOK, res)
 }
