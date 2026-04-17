@@ -20,9 +20,9 @@ React + Go + PostgreSQL + Dockerで構築した個人用Webアプリです。
 - Docker / Docker Compose
 
 ## 🔗 API
-
-- GET /users
-- POST /users
+- POST /login（認証トークン取得）
+- GET /me（ログインユーザー情報取得）
+- GET /users（ユーザー一覧 ※認証必須）
 
 詳細は[API仕様](./docs/api.md)を参照
 
@@ -56,13 +56,29 @@ React + Go + PostgreSQL + Dockerで構築した個人用Webアプリです。
 └── frontend
     ├── public
     └── src
+
+├── backend
+│  ├── controller
+│  ├── db
+│  ├── dto
+│  ├── middleware
+│  ├── model
+│  ├── repository
+│  ├── router
+│  ├── service
+│  └── utils
+├── docs
+└── frontend
+    ├── public
+    └── src
+        └── assets
 ```
 
 
 ## 🚧 今後の予定
-
-- フロントエンドとの連携
-- UI改善
+- 投稿機能の追加
+- UI/UXの改善
+- 認証周りの強化（リフレッシュトークンなど）
 
 ---
 
