@@ -31,7 +31,9 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 
 	// フォーマット簡易チェック（YYYY-MM-DD）
 	if input.DueDate != nil {
-		if !isValidDate(*input.DueDate) {
+		if *input.DueDate == "" {
+			input.DueDate = nil
+		} else if !isValidDate(*input.DueDate) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid dueDate format"})
 			return
 		}
@@ -69,7 +71,7 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 		return
 	}
 
-	var res []dto.TaskResponse
+	res := make([]dto.TaskResponse, 0, len(tasks))
 
 	for _, t := range tasks {
 		res = append(res, dto.TaskResponse{
