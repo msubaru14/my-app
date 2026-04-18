@@ -6,5 +6,5 @@ type Task struct {
 	gorm.Model
 	Title     string  `json:"title"`
 	Completed bool    `json:"completed" gorm:"default:false"`
-	DueDate   *string `json:"dueDate" gorm:"type:date"`
+	DueDate   *string `json:"dueDate" gorm:"type:text"`
 }

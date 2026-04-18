@@ -32,8 +32,13 @@ func SetupRouter(
 	auth := r.Group("/")
 	auth.Use(middleware.AuthMiddleware())
 
+	// ユーザ系
 	auth.GET("/users", userController.GetUsers)
 	auth.GET("/me", userController.GetMe)
+
+	// タスク系
+	auth.POST("/tasks", taskController.CreateTask)
+	auth.GET("/tasks", taskController.GetTasks)
 
 	return r
 }
