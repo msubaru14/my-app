@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { TaskList } from "./components/TaskList";
 
 type User = {
   id: number;
@@ -7,14 +8,15 @@ type User = {
 };
 
 function App() {
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem("token");
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     if (!token) return;
 
     fetch("http://localhost:8080/me", {
@@ -32,7 +34,7 @@ function App() {
       .then((data) => {
         if (data) setUser(data);
       });
-  }, []);
+  }, [token]);
 
   const handleLogin = async () => {
     setError("");
@@ -52,6 +54,7 @@ function App() {
     const data = await res.json();
 
     localStorage.setItem("token", data.token);
+    setToken(data.token);
 
     fetch("http://localhost:8080/me", {
       headers: {
@@ -93,11 +96,15 @@ function App() {
         {user ? (
           <>
             <p style={{ marginTop: "12px", textAlign: "center" }}>こんにちは、{user.name}さん</p>
+
+            {token && <TaskList token={token} />}
+
             <button
               style={{ marginTop: "12px" }}
               onClick={() => {
                 localStorage.removeItem("token");
                 setUser(null);
+                setToken(null);
               }}
             >
             ログアウト
