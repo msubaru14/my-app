@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { TaskList } from "./components/TaskList";
 
 type User = {
   id: number;
@@ -93,6 +94,9 @@ function App() {
         {user ? (
           <>
             <p style={{ marginTop: "12px", textAlign: "center" }}>こんにちは、{user.name}さん</p>
+
+            <TaskList token={localStorage.getItem("token")!} />
+
             <button
               style={{ marginTop: "12px" }}
               onClick={() => {
