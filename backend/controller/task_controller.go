@@ -60,3 +60,27 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		"task": res,
 	})
 }
+
+// GET /tasks
+func (tc *TaskController) GetTasks(c *gin.Context) {
+	tasks, err := tc.Service.GetTasks()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var res []dto.TaskResponse
+
+	for _, t := range tasks {
+		res = append(res, dto.TaskResponse{
+			ID:        t.ID,
+			Title:     t.Title,
+			Completed: t.Completed,
+			DueDate:   t.DueDate,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"tasks": res,
+	})
+}
