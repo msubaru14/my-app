@@ -6,10 +6,13 @@ export const fetchTasks = async (token: string) => {
     },
   });
 
-  if (!res.ok) throw new Error("failed to fetch tasks");
+  const json = await res.json();
 
-  const data = await res.json();
-  return data.tasks;
+  if (json.error) {
+    throw new Error(json.error.code);
+  }
+
+  return json.data.tasks;
 };
 
 // POST /tasks

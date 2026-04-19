@@ -1,12 +1,13 @@
 package middleware
 
 import (
-	"net/http"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/msubaru14/my-app-backend/pkg/response"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -15,35 +16,49 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "認証ヘッダーなし"})
-			c.Abort()
+			response.Unauthorized(c)
 			return
 		}
 
 		// "Bearer xxx" を分解
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "不正な形式"})
-			c.Abort()
+			response.Unauthorized(c)
 			return
 		}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method")
+			}
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "トークン無効"})
-			c.Abort()
+			response.Unauthorized(c)
 			return
 		}
 
-		// claims取得
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			userIDFloat := claims["user_id"].(float64)
-			userID := uint(userIDFloat)
-			c.Set("user_id", userID)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			response.Unauthorized(c)
+			return
 		}
+
+		userIDValue, ok := claims["user_id"]
+		if !ok {
+			response.Unauthorized(c)
+			return
+		}
+
+		userIDFloat, ok := userIDValue.(float64)
+		if !ok {
+			response.Unauthorized(c)
+			return
+		}
+
+		userID := uint(userIDFloat)
+		c.Set("user_id", userID)
 
 		c.Next()
 	}

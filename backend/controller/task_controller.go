@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
+	"github.com/msubaru14/my-app-backend/pkg/apperror"
+	"github.com/msubaru14/my-app-backend/pkg/response"
 	"github.com/msubaru14/my-app-backend/service"
 )
 
@@ -67,7 +69,10 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 func (tc *TaskController) GetTasks(c *gin.Context) {
 	tasks, err := tc.Service.GetTasks()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
 
@@ -82,7 +87,7 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	response.Success(c, gin.H{
 		"tasks": res,
 	})
 }
