@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { TaskList } from "./components/TaskList";
+import type { ErrorDetail } from "./types/error";
 
 type User = {
   id: number;
@@ -15,6 +16,7 @@ function App() {
   const [password, setPassword] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<string[]>([]);
 
   useEffect(() => {
     if (!token) return;
@@ -38,6 +40,8 @@ function App() {
 
   const handleLogin = async () => {
     setError("");
+    setFieldErrors([]);
+    
     const res = await fetch("http://localhost:8080/login", {
       method: "POST",
       headers: {
@@ -46,31 +50,51 @@ function App() {
       body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) {
+    const json = await res.json();
+
+    if (json.error) {
+      // バリデーションエラー
+      if (json.error.code === "VALIDATION_ERROR") {
+        const messages = (json.error.details ?? []).map((d: ErrorDetail) => d.message);
+        setFieldErrors(messages);
+        setError("");
+        return;
+      }
+
+      // 認証エラー
+      if (json.error.code === "UNAUTHORIZED") {
+        setError("メールアドレスまたはパスワードが違います");
+        setFieldErrors([]);
+        return;
+      }
+
+      // その他
       setError("ログイン失敗");
+      setFieldErrors([]);
       return;
     }
 
-    const data = await res.json();
+    const newToken = json.data.token;
 
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
+    localStorage.setItem("token", newToken);
+    setToken(newToken);
 
     fetch("http://localhost:8080/me", {
       headers: {
-        Authorization: `Bearer ${data.token}`,
+        Authorization: `Bearer ${newToken}`,
       },
     })
-      .then((res) => {
-        if(!res.ok) {
-          localStorage.removeItem("token");
-          return null;
-        }
-        return res.json();})
-      .then((data) => {
-        if (data) setUser(data);
-      });
+    .then((res) => {
+      if(!res.ok) {
+        localStorage.removeItem("token");
+        return null;
+      }
+      return res.json();})
+    .then((data) => {
+      if (data) setUser(data);
+    });
 
+    setFieldErrors([]);
     setEmail("");
     setPassword("");
   };
@@ -160,6 +184,9 @@ function App() {
           </>
         )}
 
+        {fieldErrors.map((msg, i) => (
+          <p key={i} style={{ color: "red" }}>{msg}</p>
+        ))}
         {error && <p style={{ marginTop: "12px", textAlign: "center", color: "red" }}>{error}</p>}
       </div>
     </div>
