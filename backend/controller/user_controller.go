@@ -5,6 +5,8 @@ import (
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
+	"github.com/msubaru14/my-app-backend/pkg/apperror"
+	"github.com/msubaru14/my-app-backend/pkg/response"
 	"github.com/msubaru14/my-app-backend/service"
 
 	"github.com/gin-gonic/gin"
@@ -55,15 +57,24 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 // ログインユーザ取得
 func (uc *UserController) GetMe(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		response.Unauthorized(c)
 		return
 	}
 
-	user, err := uc.Service.GetByID(userID.(uint))
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		response.Unauthorized(c)
+		return
+	}
+
+	user, err := uc.Service.GetByID(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user"})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
 
@@ -72,6 +83,5 @@ func (uc *UserController) GetMe(c *gin.Context) {
 		Name:  user.Name,
 		Email: user.Email,
 	}
-
-	c.JSON(http.StatusOK, res)
+	response.Success(c, res)
 }

@@ -17,86 +17,96 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!token) return;
+
+    let isMounted = true;
 
     fetch("http://localhost:8080/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => {
-        if(!res.ok) {
+      .then((res) => res.json())
+      .then((json) => {
+        if (!isMounted) return;
+
+        if (!json || json.error) {
           localStorage.removeItem("token");
-          return null;
+          setToken(null);
+          setUser(null);
+          return;
         }
-        return res.json();
+
+        setUser(json.data);
       })
-      .then((data) => {
-        if (data) setUser(data);
+      .catch(() => {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
       });
+
+      return () => {
+        isMounted = false;
+      };
   }, [token]);
 
   const handleLogin = async () => {
     setError("");
     setFieldErrors([]);
+    setLoading(true);
     
-    const res = await fetch("http://localhost:8080/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("http://localhost:8080/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const json = await res.json();
+      const json = await res.json();
 
-    if (json.error) {
-      // バリデーションエラー
-      if (json.error.code === "VALIDATION_ERROR") {
-        const messages = (json.error.details ?? []).map((d: ErrorDetail) => d.message);
-        setFieldErrors(messages);
-        setError("");
-        return;
-      }
+      if (json.error) {
+        // バリデーションエラー
+        if (json.error.code === "VALIDATION_ERROR") {
+          const details = Array.isArray(json.error.details) ? json.error.details : [];
+          const messages = details.map((d: ErrorDetail) => d.message);
 
-      // 認証エラー
-      if (json.error.code === "UNAUTHORIZED") {
-        setError("メールアドレスまたはパスワードが違います");
+          setFieldErrors(messages);
+          setError("");
+          return;
+        }
+
+        // 認証エラー
+        if (json.error.code === "UNAUTHORIZED") {
+          setError("メールアドレスまたはパスワードが違います");
+          setFieldErrors([]);
+          return;
+        }
+
+        // その他
+        setError("ログイン失敗");
         setFieldErrors([]);
         return;
       }
 
-      // その他
-      setError("ログイン失敗");
+      const newToken = json.data.token;
+
+      localStorage.setItem("token", newToken);
+      setToken(newToken);
+
       setFieldErrors([]);
-      return;
+      setError("");
+      setEmail("");
+      setPassword("");
+    } catch {
+      setError("通信エラー");
+    } finally {
+      setLoading(false);
     }
-
-    const newToken = json.data.token;
-
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
-
-    fetch("http://localhost:8080/me", {
-      headers: {
-        Authorization: `Bearer ${newToken}`,
-      },
-    })
-    .then((res) => {
-      if(!res.ok) {
-        localStorage.removeItem("token");
-        return null;
-      }
-      return res.json();})
-    .then((data) => {
-      if (data) setUser(data);
-    });
-
-    setFieldErrors([]);
-    setEmail("");
-    setPassword("");
   };
 
   return (
@@ -149,6 +159,7 @@ function App() {
               type="email"
               placeholder="メール"
               value={email}
+              disabled={loading}
               onChange={(e) => setEmail(e.target.value)}
             />
 
@@ -164,6 +175,7 @@ function App() {
               type="password"
               placeholder="パスワード"
               value={password}
+              disabled={loading}
               onChange={(e) => setPassword(e.target.value)}
             />
 
@@ -177,9 +189,10 @@ function App() {
                 border: "none",
                 borderRadius: "4px"
               }} 
+              disabled={loading}
               onClick={handleLogin}
             >
-              ログイン
+              {loading ? "ログイン中..." : "ログイン"}
             </button>
           </>
         )}
