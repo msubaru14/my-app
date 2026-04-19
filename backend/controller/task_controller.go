@@ -87,7 +87,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		DueDate:   createdTask.DueDate,
 	}
 
-	response.Success(c, gin.H{
+	response.SuccessCreated(c, gin.H{
 		"task": res,
 	})
 }
