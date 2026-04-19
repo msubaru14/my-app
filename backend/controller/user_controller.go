@@ -5,6 +5,8 @@ import (
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
+	"github.com/msubaru14/my-app-backend/pkg/apperror"
+	"github.com/msubaru14/my-app-backend/pkg/response"
 	"github.com/msubaru14/my-app-backend/service"
 
 	"github.com/gin-gonic/gin"
@@ -18,11 +20,24 @@ type UserController struct {
 func (uc *UserController) GetUsers(c *gin.Context) {
 	users, err := uc.Service.GetUsers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"users": users,
+
+	res := make([]dto.UserResponse, 0, len(users))
+	for _, u := range users {
+		res = append(res, dto.UserResponse{
+			ID:    u.ID,
+			Name:  u.Name,
+			Email: u.Email,
+		})
+	}
+
+	response.Success(c, gin.H{
+		"users": res,
 	})
 }
 
@@ -31,7 +46,45 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	var input dto.CreateUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeInvalidRequest,
+			Message: "invalid request",
+		})
+		return
+	}
+
+	var details []apperror.ErrorDetail
+
+	if input.Name == "" {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "name",
+			Code:    apperror.DetailRequired,
+			Message: "名前は必須です",
+		})
+	}
+
+	if input.Email == "" {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "email",
+			Code:    apperror.DetailRequired,
+			Message: "メールアドレスは必須です",
+		})
+	}
+
+	if input.Password == "" {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "password",
+			Code:    apperror.DetailRequired,
+			Message: "パスワードは必須です",
+		})
+	}
+
+	if len(details) > 0 {
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: details,
+		})
 		return
 	}
 
@@ -44,26 +97,43 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	createdUser, err := uc.Service.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"user": createdUser,
+	res := dto.UserResponse{
+		ID:    createdUser.ID,
+		Name:  createdUser.Name,
+		Email: createdUser.Email,
+	}
+	response.SuccessCreated(c, gin.H{
+		"user": res,
 	})
 }
 
 // ログインユーザ取得
 func (uc *UserController) GetMe(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		response.Unauthorized(c)
 		return
 	}
 
-	user, err := uc.Service.GetByID(userID.(uint))
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		response.Unauthorized(c)
+		return
+	}
+
+	user, err := uc.Service.GetByID(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user"})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
 
@@ -72,6 +142,7 @@ func (uc *UserController) GetMe(c *gin.Context) {
 		Name:  user.Name,
 		Email: user.Email,
 	}
-
-	c.JSON(http.StatusOK, res)
+	response.Success(c, gin.H{
+		"user": res,
+	})
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { TaskList } from "./components/TaskList";
+import type { ErrorDetail } from "./types/error";
 
 type User = {
   id: number;
@@ -15,64 +16,97 @@ function App() {
   const [password, setPassword] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!token) return;
+
+    let isMounted = true;
 
     fetch("http://localhost:8080/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => {
-        if(!res.ok) {
+      .then((res) => res.json())
+      .then((json) => {
+        if (!isMounted) return;
+
+        if (!json || json.error) {
           localStorage.removeItem("token");
-          return null;
+          setToken(null);
+          setUser(null);
+          return;
         }
-        return res.json();
+
+        setUser(json.data);
       })
-      .then((data) => {
-        if (data) setUser(data);
+      .catch(() => {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
       });
+
+      return () => {
+        isMounted = false;
+      };
   }, [token]);
 
   const handleLogin = async () => {
     setError("");
-    const res = await fetch("http://localhost:8080/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!res.ok) {
-      setError("ログイン失敗");
-      return;
-    }
-
-    const data = await res.json();
-
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-
-    fetch("http://localhost:8080/me", {
-      headers: {
-        Authorization: `Bearer ${data.token}`,
-      },
-    })
-      .then((res) => {
-        if(!res.ok) {
-          localStorage.removeItem("token");
-          return null;
-        }
-        return res.json();})
-      .then((data) => {
-        if (data) setUser(data);
+    setFieldErrors([]);
+    setLoading(true);
+    
+    try {
+      const res = await fetch("http://localhost:8080/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-    setEmail("");
-    setPassword("");
+      const json = await res.json();
+
+      if (json.error) {
+        // バリデーションエラー
+        if (json.error.code === "VALIDATION_ERROR") {
+          const details = Array.isArray(json.error.details) ? json.error.details : [];
+          const messages = details.map((d: ErrorDetail) => d.message);
+
+          setFieldErrors(messages);
+          setError("");
+          return;
+        }
+
+        // 認証エラー
+        if (json.error.code === "UNAUTHORIZED") {
+          setError("メールアドレスまたはパスワードが違います");
+          setFieldErrors([]);
+          return;
+        }
+
+        // その他
+        setError("ログイン失敗");
+        setFieldErrors([]);
+        return;
+      }
+
+      const newToken = json.data.token;
+
+      localStorage.setItem("token", newToken);
+      setToken(newToken);
+
+      setFieldErrors([]);
+      setError("");
+      setEmail("");
+      setPassword("");
+    } catch {
+      setError("通信エラー");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,6 +159,7 @@ function App() {
               type="email"
               placeholder="メール"
               value={email}
+              disabled={loading}
               onChange={(e) => setEmail(e.target.value)}
             />
 
@@ -140,6 +175,7 @@ function App() {
               type="password"
               placeholder="パスワード"
               value={password}
+              disabled={loading}
               onChange={(e) => setPassword(e.target.value)}
             />
 
@@ -153,13 +189,17 @@ function App() {
                 border: "none",
                 borderRadius: "4px"
               }} 
+              disabled={loading}
               onClick={handleLogin}
             >
-              ログイン
+              {loading ? "ログイン中..." : "ログイン"}
             </button>
           </>
         )}
 
+        {fieldErrors.map((msg, i) => (
+          <p key={i} style={{ color: "red" }}>{msg}</p>
+        ))}
         {error && <p style={{ marginTop: "12px", textAlign: "center", color: "red" }}>{error}</p>}
       </div>
     </div>
