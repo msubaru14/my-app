@@ -20,11 +20,24 @@ type UserController struct {
 func (uc *UserController) GetUsers(c *gin.Context) {
 	users, err := uc.Service.GetUsers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"users": users,
+
+	res := make([]dto.UserResponse, 0, len(users))
+	for _, u := range users {
+		res = append(res, dto.UserResponse{
+			ID:    u.ID,
+			Name:  u.Name,
+			Email: u.Email,
+		})
+	}
+
+	response.Success(c, gin.H{
+		"users": res,
 	})
 }
 
@@ -33,7 +46,45 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	var input dto.CreateUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeInvalidRequest,
+			Message: "invalid request",
+		})
+		return
+	}
+
+	var details []apperror.ErrorDetail
+
+	if input.Name == "" {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "name",
+			Code:    apperror.DetailRequired,
+			Message: "名前は必須です",
+		})
+	}
+
+	if input.Email == "" {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "email",
+			Code:    apperror.DetailRequired,
+			Message: "メールアドレスは必須です",
+		})
+	}
+
+	if input.Password == "" {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "password",
+			Code:    apperror.DetailRequired,
+			Message: "パスワードは必須です",
+		})
+	}
+
+	if len(details) > 0 {
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: details,
+		})
 		return
 	}
 
@@ -46,12 +97,20 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	createdUser, err := uc.Service.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"user": createdUser,
+	res := dto.UserResponse{
+		ID:    createdUser.ID,
+		Name:  createdUser.Name,
+		Email: createdUser.Email,
+	}
+	response.SuccessCreated(c, gin.H{
+		"user": res,
 	})
 }
 
@@ -83,5 +142,7 @@ func (uc *UserController) GetMe(c *gin.Context) {
 		Name:  user.Name,
 		Email: user.Email,
 	}
-	response.Success(c, res)
+	response.Success(c, gin.H{
+		"user": res,
+	})
 }

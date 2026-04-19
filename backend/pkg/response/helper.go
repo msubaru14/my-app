@@ -16,6 +16,14 @@ func Success(c *gin.Context, data interface{}) {
 	})
 }
 
+// 作成成功レスポンス
+func SuccessCreated(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusCreated, Response{
+		Data:  data,
+		Error: nil,
+	})
+}
+
 // エラーレスポンス
 func Error(c *gin.Context, status int, apiErr apperror.APIError) {
 	c.JSON(status, Response{
