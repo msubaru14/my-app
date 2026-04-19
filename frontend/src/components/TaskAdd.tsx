@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createTask } from "../lib/api";
+import { createTask, ApiError } from "../lib/api";
 
 type Props = {
   token: string;
@@ -12,7 +12,7 @@ export const TaskAdd = ({ token, onTaskAdded }: Props) => {
   const [dueDate, setDueDate] = useState("");
 
   const handleTaskAdd = async () => {
-    if (!title) {
+    if (!title.trim()) {
       alert("タスク名を入力してください");
       return
     }
@@ -20,12 +20,25 @@ export const TaskAdd = ({ token, onTaskAdded }: Props) => {
     // タスク追加API
     try {
       await createTask(token, title, dueDate);
-      onTaskAdded();
 
       setTitle("");
       setDueDate("");
-    } catch (e) {
+
+      onTaskAdded();
+    } catch (e: unknown) {
       console.error(e);
+      if (e instanceof ApiError) {
+        if (e.message === "VALIDATION_ERROR") {
+          alert("入力内容に問題があります");
+          return;
+        }
+
+        if (e.message === "UNAUTHORIZED") {
+          alert("ログインが必要です");
+          return;
+        }
+      }
+
       alert("タスク追加失敗");
     }
   };

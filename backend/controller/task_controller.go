@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-	"regexp"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/msubaru14/my-app-backend/dto"
@@ -16,18 +16,30 @@ type TaskController struct {
 	Service *service.TaskService
 }
 
-var dateRegex = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-
-func isValidDate(date string) bool {
-	return dateRegex.MatchString(date)
-}
-
 // POST /tasks
 func (tc *TaskController) CreateTask(c *gin.Context) {
 	var input dto.CreateTaskInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeInvalidRequest,
+			Message: "invalid request",
+		})
+		return
+	}
+
+	if input.Title == "" {
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: []apperror.ErrorDetail{
+				{
+					Field:   "title",
+					Code:    apperror.DetailRequired,
+					Message: "タイトルは必須です",
+				},
+			},
+		})
 		return
 	}
 
@@ -35,9 +47,21 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 	if input.DueDate != nil {
 		if *input.DueDate == "" {
 			input.DueDate = nil
-		} else if !isValidDate(*input.DueDate) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid dueDate format"})
-			return
+		} else {
+			if _, err := time.Parse("2006-01-02", *input.DueDate); err != nil {
+				response.Error(c, http.StatusBadRequest, apperror.APIError{
+					Code:    apperror.CodeValidationError,
+					Message: "validation error",
+					Details: []apperror.ErrorDetail{
+						{
+							Field:   "dueDate",
+							Code:    apperror.DetailInvalidFormat,
+							Message: "日付は YYYY-MM-DD 形式で入力してください",
+						},
+					},
+				})
+				return
+			}
 		}
 	}
 
@@ -49,7 +73,10 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 
 	createdTask, err := tc.Service.CreateTask(task)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
 		return
 	}
 
@@ -60,7 +87,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		DueDate:   createdTask.DueDate,
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	response.Success(c, gin.H{
 		"task": res,
 	})
 }

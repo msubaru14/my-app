@@ -1,3 +1,12 @@
+export class ApiError extends Error {
+  code: string;
+
+  constructor(code: string) {
+    super(code);
+    this.code = code;
+  }
+}
+
 // GET /tasks
 export const fetchTasks = async (token: string) => {
   const res = await fetch("http://localhost:8080/tasks", {
@@ -9,14 +18,18 @@ export const fetchTasks = async (token: string) => {
   const json = await res.json();
 
   if (json.error) {
-    throw new Error(json.error.code);
+    throw new ApiError(json.error.code);
   }
 
   return json.data.tasks;
 };
 
 // POST /tasks
-export const createTask = async (token: string, title: string, dueDate: string) => {
+export const createTask = async (
+  token: string,
+  title: string,
+  dueDate: string
+) => {
   const res = await fetch("http://localhost:8080/tasks", {
     method: "POST",
     headers: {
@@ -25,9 +38,15 @@ export const createTask = async (token: string, title: string, dueDate: string) 
     },
     body: JSON.stringify({
       title,
-      dueDate,
+      dueDate: dueDate || null,
     }),
   });
 
-  if (!res.ok) throw new Error("failed to create tasks");
+  const json = await res.json();
+
+  if (json.error) {
+    throw new ApiError(json.error.code);
+  }
+
+  return json.data.task;
 }

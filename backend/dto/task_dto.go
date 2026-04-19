@@ -1,7 +1,7 @@
 package dto
 
 type CreateTaskInput struct {
-	Title   string  `json:"title" binding:"required"`
+	Title   string  `json:"title"`
 	DueDate *string `json:"dueDate"`
 }
 
