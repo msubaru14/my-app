@@ -40,7 +40,7 @@ function App() {
           return;
         }
 
-        setUser(json.data);
+        setUser(json.data.user);
       })
       .catch(() => {
         localStorage.removeItem("token");

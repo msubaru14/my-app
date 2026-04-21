@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -65,10 +66,12 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		}
 	}
 
+	userID := c.GetUint("user_id")
 	task := model.Task{
 		Title:     input.Title,
 		Completed: false,
 		DueDate:   input.DueDate,
+		UserID:    userID,
 	}
 
 	createdTask, err := tc.Service.CreateTask(task)
@@ -94,7 +97,8 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 
 // GET /tasks
 func (tc *TaskController) GetTasks(c *gin.Context) {
-	tasks, err := tc.Service.GetTasks()
+	userID := c.GetUint("user_id")
+	tasks, err := tc.Service.GetTasksByUser(userID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, apperror.APIError{
 			Code:    apperror.CodeInternalServerError,
@@ -116,5 +120,56 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 
 	response.Success(c, gin.H{
 		"tasks": res,
+	})
+}
+
+// PATCH /tasks/:id
+func (tc *TaskController) UpdateTaskStatus(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: nil,
+		})
+		return
+	}
+
+	userID := c.GetUint("user_id")
+
+	var input dto.UpdateTaskRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: nil,
+		})
+		return
+	}
+
+	task, err := tc.Service.UpdateTaskStatus(uint(id), userID, *input.Completed)
+	if err != nil {
+		if apiErr, ok := err.(*apperror.APIError); ok {
+			response.Error(c, http.StatusNotFound, *apiErr)
+			return
+		}
+
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
+		return
+	}
+
+	res := dto.TaskResponse{
+		ID:        task.ID,
+		Title:     task.Title,
+		Completed: task.Completed,
+		DueDate:   task.DueDate,
+	}
+
+	response.Success(c, gin.H{
+		"task": res,
 	})
 }

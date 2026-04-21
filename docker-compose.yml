@@ -28,7 +28,6 @@ services:
     volumes:
       - ./backend:/app
     restart: unless-stopped
-    command: go run main.go
 
   frontend:
     build: ./frontend

@@ -7,4 +7,5 @@ type Task struct {
 	Title     string  `json:"title"`
 	Completed bool    `json:"completed" gorm:"default:false"`
 	DueDate   *string `json:"dueDate" gorm:"type:text"`
+	UserID    uint    `json:"userId" gorm:"not null;index"`
 }
