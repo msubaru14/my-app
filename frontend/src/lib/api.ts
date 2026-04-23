@@ -9,6 +9,7 @@ export class ApiError extends Error {
 
 // GET /tasks
 export const fetchTasks = async (token: string) => {
+  console.log('fetch tasks');
   const res = await fetch("http://localhost:8080/tasks", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -50,3 +51,30 @@ export const createTask = async (
 
   return json.data.task;
 }
+
+// PATCH /tasks/:id
+export const updateTaskState = async (
+  id: number,
+  current: boolean,
+  token: string
+) => {
+  const res = await fetch(`http://localhost:8080/tasks/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      completed: !current,
+    }),
+  });
+
+  const json = await res.json();
+
+  if (json.error) {
+    throw new ApiError(json.error.code);
+  }
+
+  return json.data.task;
+}
+
