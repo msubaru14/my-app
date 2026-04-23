@@ -19,7 +19,7 @@ func SetupRouter(
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{os.Getenv("FRONTEND_URL")},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
@@ -39,6 +39,7 @@ func SetupRouter(
 	// タスク系
 	auth.POST("/tasks", taskController.CreateTask)
 	auth.GET("/tasks", taskController.GetTasks)
+	auth.PATCH("/tasks/:id", taskController.UpdateTaskStatus)
 
 	return r
 }

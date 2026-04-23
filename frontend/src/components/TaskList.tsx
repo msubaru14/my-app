@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../types/task";
-import { fetchTasks } from "../lib/api";
+import { fetchTasks, updateTaskState } from "../lib/api";
 import { TaskAdd } from "./TaskAdd";
 
 type Props = {
@@ -27,6 +27,15 @@ export const TaskList = ({ token }: Props) => {
     loadTasks();
   }, [loadTasks]);
 
+  const handleToggle = async (id: number, current: boolean) => {
+    try {
+      await updateTaskState(id, current, token);
+      await loadTasks(); // 再フェッチ
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const todayStr = getTodayString();
 
   const todayTasks = tasks.filter(
@@ -38,7 +47,14 @@ export const TaskList = ({ token }: Props) => {
       <h2>今日のタスク</h2>
       <ul>
         {todayTasks.map((task) => (
-          <li key={task.id}>{task.title}</li>
+          <li key={task.id}>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => handleToggle(task.id, task.completed)}
+            />
+            {task.title}
+          </li>
         ))}
       </ul>
 

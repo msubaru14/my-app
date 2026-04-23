@@ -18,7 +18,12 @@ func main() {
 		log.Fatalf("DB接続失敗: %v", err)
 	}
 
-	// マイグレーション
+	// 手動マイグレーション
+	if err := db.RunMigrations(database); err != nil {
+		log.Fatal("migration failed:", err)
+	}
+
+	// GORMマイグレーション
 	if err := database.AutoMigrate(&model.User{}, &model.Task{}); err != nil {
 		log.Fatal("マイグレーション失敗:", err)
 	}

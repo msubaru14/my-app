@@ -412,3 +412,60 @@ Authorization: Bearer {token}
 * 200: 成功（取得・更新）
 * 401: 認証エラー
 * 500: サーバエラー
+
+---
+
+## タスク状態更新（認証必須）
+
+### PATCH /tasks/:id
+
+#### ヘッダー
+
+```
+Authorization: Bearer {token}
+```
+
+#### リクエスト
+
+```json
+{
+  "completed": true
+}
+```
+
+#### レスポンス（成功）
+
+```json
+{
+  "data": {
+    "task": {
+      "id": 1,
+      "title": "string",
+      "completed": true,
+      "dueDate": "YYYY-MM-DD"
+    }
+  },
+  "error": null
+}
+```
+
+#### レスポンス（エラー）
+
+```json
+{
+  "data": null,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "task not found"
+  }
+}
+```
+※ その他のエラーは共通レスポンス仕様を参照
+
+#### ステータスコード
+
+* 200: 更新成功
+* 400: 入力不正
+* 401: 認証エラー
+* 404: タスク未存在
+* 500: サーバエラー

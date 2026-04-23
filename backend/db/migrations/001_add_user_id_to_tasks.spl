@@ -1,0 +1,18 @@
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version VARCHAR(255) PRIMARY KEY
+);
+ALTER TABLE tasks ADD COLUMN user_id BIGINT;
+
+UPDATE tasks SET user_id = 1;
+
+ALTER TABLE tasks ALTER COLUMN user_id SET NOT NULL;
+
+ALTER TABLE tasks
+ADD CONSTRAINT fk_tasks_user
+FOREIGN KEY (user_id) REFERENCES users(id)
+ON DELETE CASCADE;
+
+-- +migrate Down
+ALTER TABLE tasks DROP CONSTRAINT fk_tasks_user;
+ALTER TABLE tasks DROP COLUMN user_id;

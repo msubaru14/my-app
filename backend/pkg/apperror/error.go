@@ -13,3 +13,15 @@ type ErrorDetail struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
+
+// NOT_FOUND生成
+func NewNotFound(message string) error {
+	return &APIError{
+		Code:    CodeNotFound,
+		Message: message,
+	}
+}
+
+func (e *APIError) Error() string {
+	return e.Message
+}
