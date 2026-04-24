@@ -124,13 +124,13 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 }
 
 // PATCH /tasks/:id
-func (tc *TaskController) UpdateTaskStatus(c *gin.Context) {
+func (tc *TaskController) UpdateTask(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
+			Code:    apperror.CodeInvalidRequest,
+			Message: "invalid request",
 			Details: nil,
 		})
 		return
@@ -148,10 +148,11 @@ func (tc *TaskController) UpdateTaskStatus(c *gin.Context) {
 		return
 	}
 
-	task, err := tc.Service.UpdateTaskStatus(uint(id), userID, *input.Completed)
+	task, err := tc.Service.UpdateTask(uint(id), userID, input)
 	if err != nil {
 		if apiErr, ok := err.(*apperror.APIError); ok {
-			response.Error(c, http.StatusNotFound, *apiErr)
+			status := apperror.MapErrorCodeToStatus(apiErr.Code)
+			response.Error(c, status, *apiErr)
 			return
 		}
 
@@ -172,4 +173,37 @@ func (tc *TaskController) UpdateTaskStatus(c *gin.Context) {
 	response.Success(c, gin.H{
 		"task": res,
 	})
+}
+
+// DELETE /tasks/:id
+func (tc *TaskController) DeleteTask(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, apperror.APIError{
+			Code:    apperror.CodeInvalidRequest,
+			Message: "invalid request",
+			Details: nil,
+		})
+		return
+	}
+
+	userID := c.GetUint("user_id")
+
+	err = tc.Service.DeleteTask(uint(id), userID)
+	if err != nil {
+		if apiErr, ok := err.(*apperror.APIError); ok {
+			status := apperror.MapErrorCodeToStatus(apiErr.Code)
+			response.Error(c, status, *apiErr)
+			return
+		}
+
+		response.Error(c, http.StatusInternalServerError, apperror.APIError{
+			Code:    apperror.CodeInternalServerError,
+			Message: "internal server error",
+		})
+		return
+	}
+
+	response.Success(c, nil)
 }
