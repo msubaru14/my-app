@@ -39,7 +39,8 @@ func SetupRouter(
 	// タスク系
 	auth.POST("/tasks", taskController.CreateTask)
 	auth.GET("/tasks", taskController.GetTasks)
-	auth.PATCH("/tasks/:id", taskController.UpdateTaskStatus)
+	auth.PATCH("/tasks/:id", taskController.UpdateTask)
+	auth.DELETE("/tasks/:id", taskController.DeleteTask)
 
 	return r
 }

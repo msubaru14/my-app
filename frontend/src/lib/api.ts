@@ -1,3 +1,5 @@
+import type { Task } from "../types/task";
+
 export class ApiError extends Error {
   code: string;
 
@@ -52,8 +54,8 @@ export const createTask = async (
   return json.data.task;
 }
 
-// PATCH /tasks/:id
-export const updateTaskState = async (
+// PATCH /tasks/:id (完了チェック)
+export const toggleTaskComplete = async (
   id: number,
   current: boolean,
   token: string
@@ -78,3 +80,37 @@ export const updateTaskState = async (
   return json.data.task;
 }
 
+// PATCH /tasks/:id (タスク編集)
+export const updateTask = async (
+  task: Task,
+  token: string
+) => {
+  await fetch(`http://localhost:8080/tasks/${task.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      title: task.title,
+      dueDate: task.dueDate,
+      completed: task.completed,
+    }),
+  });
+}
+
+// DELETE /tasks/:id
+export const deleteTask = async (id: number, token: string) => {
+  const res = await fetch(`http://localhost:8080/tasks/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!res.ok) {
+    throw new Error("削除に失敗しました")
+  }
+
+  return res.json()
+}

@@ -13,5 +13,7 @@ type TaskResponse struct {
 }
 
 type UpdateTaskRequest struct {
-	Completed *bool `json:"completed" binding:"required"`
+	Title     *string `json:"title"`
+	DueDate   *string `json:"dueDate"`
+	Completed *bool   `json:"completed"`
 }

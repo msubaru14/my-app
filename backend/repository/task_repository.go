@@ -36,3 +36,8 @@ func (r *TaskRepository) FindByIDAndUserID(id uint, userID uint) (*model.Task, e
 func (r *TaskRepository) Update(task *model.Task) error {
 	return r.DB.Save(task).Error
 }
+
+// タスク削除
+func (r *TaskRepository) Delete(task *model.Task) error {
+	return r.DB.Delete(task).Error
+}
