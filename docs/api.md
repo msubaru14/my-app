@@ -415,7 +415,7 @@ Authorization: Bearer {token}
 
 ---
 
-## タスク状態更新（認証必須）
+## タスク更新（認証必須）
 
 ### PATCH /tasks/:id
 
@@ -429,9 +429,13 @@ Authorization: Bearer {token}
 
 ```json
 {
+  "title": "string",
+  "dueDate": "YYYY-MM-DD",
   "completed": true
 }
+
 ```
+※ 任意フィールド（送信されたもののみ更新）
 
 #### レスポンス（成功）
 
@@ -462,10 +466,61 @@ Authorization: Bearer {token}
 ```
 ※ その他のエラーは共通レスポンス仕様を参照
 
+#### バリデーション
+
+- リクエストは少なくとも1つのフィールドが必要
+- title:
+  - 空文字・空白のみは禁止
+- dueDate:
+  - YYYY-MM-DD形式
+  - 空文字は禁止
+  - nullによる削除は未対応
+- completed:
+  - true / false
+
 #### ステータスコード
 
 * 200: 更新成功
 * 400: 入力不正
+* 401: 認証エラー
+* 404: タスク未存在
+* 500: サーバエラー
+
+---
+
+## タスク削除（認証必須）
+
+### DELETE /tasks/:id
+
+#### ヘッダー
+
+Authorization: Bearer {token}
+
+#### レスポンス（成功）
+
+```json
+{
+  "data": null,
+  "error": null
+}
+```
+
+#### レスポンス（エラー）
+
+```json
+{
+  "data": null,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "task not found"
+  }
+}
+```
+※ その他のエラーは共通レスポンス仕様を参照
+
+#### ステータスコード
+
+* 200: 更新成功
 * 401: 認証エラー
 * 404: タスク未存在
 * 500: サーバエラー

@@ -28,24 +28,32 @@ func (s *TaskService) GetTasksByUser(userID uint) ([]model.Task, error) {
 
 // タスク更新
 func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest) (*model.Task, error) {
+	if req.Title == nil && req.DueDate == nil && req.Completed == nil {
+		return nil, apperror.NewInvalidRequest("no fields to update")
+	}
+
 	details := []apperror.ErrorDetail{}
 
 	// タイトルバリデーション
-	trimmedTitle := strings.TrimSpace(req.Title)
-	if trimmedTitle == "" {
-		details = append(details, apperror.ErrorDetail{
-			Field:   "title",
-			Code:    apperror.DetailRequired,
-			Message: "タイトルは必須です",
-		})
-	}
+	if req.Title != nil {
+		trimmed := strings.TrimSpace(*req.Title)
+		if trimmed == "" {
+			details = append(details, apperror.ErrorDetail{
+				Field:   "title",
+				Code:    apperror.DetailRequired,
+				Message: "タイトルは必須です",
+			})
+		}
 
-	if len(trimmedTitle) > 100 {
-		details = append(details, apperror.ErrorDetail{
-			Field:   "title",
-			Code:    apperror.DetailTooLong,
-			Message: "タイトルが長すぎです",
-		})
+		if len(trimmed) > 100 {
+			details = append(details, apperror.ErrorDetail{
+				Field:   "title",
+				Code:    apperror.DetailTooLong,
+				Message: "タイトルが長すぎです",
+			})
+		}
+
+		req.Title = &trimmed
 	}
 
 	// 日付バリデーション
@@ -71,15 +79,6 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 		}
 	}
 
-	// 完了フラグバリデーション
-	if req.Completed == nil {
-		details = append(details, apperror.ErrorDetail{
-			Field:   "completed",
-			Code:    apperror.DetailRequired,
-			Message: "completedは必須です",
-		})
-	}
-
 	if len(details) > 0 {
 		return nil, apperror.NewValidationError("validation error", details)
 	}
@@ -93,9 +92,17 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 		return nil, err
 	}
 
-	task.Title = trimmedTitle
-	task.DueDate = req.DueDate
-	task.Completed = *req.Completed
+	if req.Title != nil {
+		task.Title = *req.Title
+	}
+
+	if req.DueDate != nil {
+		task.DueDate = req.DueDate
+	}
+
+	if req.Completed != nil {
+		task.Completed = *req.Completed
+	}
 
 	// タスク更新
 	if err := s.Repo.Update(task); err != nil {

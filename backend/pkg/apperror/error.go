@@ -31,6 +31,14 @@ func MapErrorCodeToStatus(code string) int {
 	}
 }
 
+// INVALID_REQUEST生成
+func NewInvalidRequest(message string) error {
+	return &APIError{
+		Code:    CodeInvalidRequest,
+		Message: message,
+	}
+}
+
 // NOT_FOUND生成
 func NewNotFound(message string) error {
 	return &APIError{

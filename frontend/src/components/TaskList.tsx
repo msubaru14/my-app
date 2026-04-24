@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../types/task";
-import { fetchTasks, updateTaskState } from "../lib/api";
+import { fetchTasks, toggleTaskComplete, deleteTask } from "../lib/api";
 import { TaskAdd } from "./TaskAdd";
+import EditTaskModal from "./EditTaskModal"
 
 type Props = {
   token: string;
@@ -18,6 +19,8 @@ const getTodayString = () => {
 // 今日のタスク一覧
 export const TaskList = ({ token }: Props) => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   const loadTasks = useCallback(() => {
     fetchTasks(token).then(setTasks).catch(console.error);
@@ -29,18 +32,37 @@ export const TaskList = ({ token }: Props) => {
 
   const handleToggle = async (id: number, current: boolean) => {
     try {
-      await updateTaskState(id, current, token);
+      await toggleTaskComplete(id, current, token);
       await loadTasks(); // 再フェッチ
     } catch (e) {
       console.log(e);
     }
   };
 
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm("このタスクを削除しますか？")
+
+    if (!confirmed) return
+
+    try {
+      await deleteTask(id, token)
+      await loadTasks()
+    } catch (e) {
+      console.error(e)
+      alert("削除に失敗しました")
+    }
+  }
+
   const todayStr = getTodayString();
 
   const todayTasks = tasks.filter(
     (task) => task.dueDate === todayStr
   );
+
+  const openModal = (task: Task) => {
+    setSelectedTask(task)
+    setIsOpen(true)
+  }
 
   return (
     <div style={{ marginTop: "20px" }}>
@@ -54,12 +76,23 @@ export const TaskList = ({ token }: Props) => {
               onChange={() => handleToggle(task.id, task.completed)}
             />
             {task.title}
+
+            <button onClick={() => openModal(task)}>編集</button>
+            <button onClick={() => handleDelete(task.id)}>削除</button>
           </li>
         ))}
       </ul>
 
       {/* タスク追加 */}
       <TaskAdd token={token} onTaskAdded={loadTasks} />
+
+      <EditTaskModal
+        token={token}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        task={selectedTask}
+        onUpdated={loadTasks}
+      />
     </div>
   );
 };
