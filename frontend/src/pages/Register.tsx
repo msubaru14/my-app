@@ -1,6 +1,10 @@
 import { useState } from "react"
 import { createUser } from "../lib/api"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
+
+import { AuthCard } from "../components/AuthCard";
+import { FormField } from "../components/FormField";
+
 
 export const Register = () => {
   const navigate = useNavigate()
@@ -8,9 +12,8 @@ export const Register = () => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // フロントバリデーション（最低限）
@@ -20,7 +23,6 @@ export const Register = () => {
     if (!password) newErrors.password = "パスワードは必須です"
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
       return
     }
 
@@ -34,38 +36,22 @@ export const Register = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <input
-          type="text"
-          placeholder="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        {errors.name && <p>{errors.name}</p>}
-      </div>
+    <AuthCard
+      title="ユーザー登録"
+      footer={
+        <>
+          すでにアカウントをお持ちの方は
+          <Link to="/login">こちら</Link>
+        </>
+      }
+    >
+      <FormField label="名前" value={name} onChange={(e) => setName(e.target.value)} />
+      <FormField label="メール" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <FormField label="パスワード" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-      <div>
-        <input
-          type="email"
-          placeholder="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {errors.email && <p>{errors.email}</p>}
-      </div>
-
-      <div>
-        <input
-          type="password"
-          placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {errors.password && <p>{errors.password}</p>}
-      </div>
-
-      <button type="submit">登録</button>
-    </form>
+      <button className="auth-button" onClick={handleRegister}>
+        登録
+      </button>
+    </AuthCard>
   )
 }

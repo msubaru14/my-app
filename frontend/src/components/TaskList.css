@@ -1,15 +1,9 @@
-h1 {
-  font-size: 28px; /* 今デカすぎる */
-  margin-bottom: 8px;
-  color: #ffffff;
-}
-
 h2, h3 {
   color: #f3f4f6;
 }
 
 body {
-  color: #e5e7eb; /* 明るいグレー */
+  color: #e5e7eb;
 }
 
 button {
@@ -22,6 +16,10 @@ button {
   gap: 4px;
 }
 
+.task-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+}
 
 .task-container {
   margin-top: 24px;
@@ -119,6 +117,16 @@ button {
 }
 
 .header {
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -133,6 +141,6 @@ button {
 }
 
 .greeting {
-  margin-bottom: 16px;
-  color: #9ca3af;
+  margin-top: 8px;
+  color: #f1f1f1;
 }

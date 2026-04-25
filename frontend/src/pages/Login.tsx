@@ -1,60 +1,17 @@
-import "../components/TaskList.css"
-import { LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
-import { TaskList } from "../components/TaskList";
+import { useState } from "react";
 import type { ErrorDetail } from "../types/error";
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
+import { AuthCard } from "../components/AuthCard";
+import { FormField } from "../components/FormField";
 
 export const Login = () => {
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem("token");
-  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-
-    let isMounted = true;
-
-    fetch("http://localhost:8080/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (!isMounted) return;
-
-        if (!json || json.error) {
-          localStorage.removeItem("token");
-          setToken(null);
-          setUser(null);
-          return;
-        }
-
-        setUser(json.data.user);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
-      });
-
-      return () => {
-        isMounted = false;
-      };
-  }, [token]);
+  const navigate = useNavigate()
 
   const handleLogin = async () => {
     setError("");
@@ -86,25 +43,16 @@ export const Login = () => {
         // 認証エラー
         if (json.error.code === "UNAUTHORIZED") {
           setError("メールアドレスまたはパスワードが違います");
-          setFieldErrors([]);
           return;
         }
 
         // その他
         setError("ログイン失敗");
-        setFieldErrors([]);
         return;
       }
 
-      const newToken = json.data.token;
-
-      localStorage.setItem("token", newToken);
-      setToken(newToken);
-
-      setFieldErrors([]);
-      setError("");
-      setEmail("");
-      setPassword("");
+      localStorage.setItem("token", json.data.token);
+      navigate("/tasks")
     } catch {
       setError("通信エラー");
     } finally {
@@ -113,107 +61,22 @@ export const Login = () => {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-    }}>
-      <div
-        style={{
-          padding: "24px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          width: "400px",
-        }}
-      >
+    <AuthCard
+      title="ログイン"
+      footer={
+        <>
+          アカウントをお持ちでない方は
+          <Link to="/register">こちら</Link>
+        </>
+      }
+    >
+      <FormField label="メール" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <FormField label="パスワード" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        {user ? (
-          <>
-            <div className="header">
-              <h1>今日のタスク</h1>
-              <button 
-                className="button-with-icon logout"
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  setUser(null);
-                  setToken(null);
-                }}
-              >
-                <LogOut size={14} />
-                ログアウト
-              </button>
-            </div>
-
-            <p className="greeting">こんにちは、{user.name}さん</p>
-
-            {token && <TaskList token={token} />}
-          </>
-          
-        ) : (
-          <>
-            <h1 style={{ textAlign: "center", fontSize: "40px" }}>ログイン</h1>
-            <input
-              style={{
-                width: "100%",
-                padding: "8px",
-                marginBottom: "12px",
-                boxSizing: "border-box",
-                backgroundColor: "#fff",
-                color: "#000"
-              }}
-              type="email"
-              placeholder="メール"
-              value={email}
-              disabled={loading}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <input
-              style={{
-                width: "100%",
-                padding: "8px",
-                marginBottom: "12px",
-                boxSizing: "border-box",
-                backgroundColor: "#fff",
-                color: "#000"
-              }}
-              type="password"
-              placeholder="パスワード"
-              value={password}
-              disabled={loading}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button
-              style={{
-                width: "100%",
-                padding: "10px",
-                boxSizing: "border-box",
-                backgroundColor: "#4CAF50",
-                color: "white",
-                border: "none",
-                borderRadius: "4px"
-              }} 
-              disabled={loading}
-              onClick={handleLogin}
-            >
-              {loading ? "ログイン中..." : "ログイン"}
-            </button>
-
-            <p style={{ marginTop: "12px", textAlign: "center" }}>
-                アカウントをお持ちでない方は
-                <Link to="/register">こちら</Link>
-            </p>
-          </>
-        )}
-
-        {fieldErrors.map((msg, i) => (
-          <p key={i} style={{ color: "red" }}>{msg}</p>
-        ))}
-        {error && <p style={{ marginTop: "12px", textAlign: "center", color: "red" }}>{error}</p>}
-      </div>
-    </div>
+      <button className="auth-button" onClick={handleLogin}>
+        ログイン
+      </button>
+    </AuthCard>
   );
 }
 

@@ -37,6 +37,24 @@ export const createUser = async (
   return json.data.user;
 };
 
+// GET /me
+export const getMe = async (token: string) => {
+  console.log('get me');
+  const res = await fetch("http://localhost:8080/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const json = await res.json();
+
+  if (json.error) {
+    throw new ApiError(json.error.code);
+  }
+
+  return json.data.user;
+}
+
 // GET /tasks
 export const fetchTasks = async (token: string) => {
   console.log('fetch tasks');
