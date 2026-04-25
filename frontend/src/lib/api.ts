@@ -9,6 +9,34 @@ export class ApiError extends Error {
   }
 }
 
+// POST /users
+export const createUser = async (
+  name: string,
+  email: string,
+  password: string
+) => {
+  console.log('create user');
+  const res = await fetch("http://localhost:8080/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      password: password
+    }),
+  });
+
+  const json = await res.json();
+
+  if (json.error) {
+    throw new ApiError(json.error.code);
+  }
+
+  return json.data.user;
+};
+
 // GET /tasks
 export const fetchTasks = async (token: string) => {
   console.log('fetch tasks');
