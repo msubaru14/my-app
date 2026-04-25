@@ -1,3 +1,4 @@
+import "./TaskList.css"
 import { useState } from "react";
 import { createTask, ApiError } from "../lib/api";
 
@@ -44,18 +45,26 @@ export const TaskAdd = ({ token, onTaskAdded }: Props) => {
   };
 
   return (
-    <>
+    <div className="task-add">
+      <h3 style={{marginTop: 0}}>タスク追加</h3>
+
       <input
-        placeholder="タスク名"
+        className="input"
+        placeholder="タスク名を入力してください"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+
       <input
+        className="input"
         type="date"
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
       />
-      <button onClick={handleTaskAdd}>追加</button>
-    </>
+
+      <button className="add-button" onClick={handleTaskAdd}>
+        追加
+      </button>
+    </div>
   );
 };

@@ -1,3 +1,5 @@
+import "./TaskList.css"
+import { Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../types/task";
 import { fetchTasks, toggleTaskComplete, deleteTask } from "../lib/api";
@@ -65,25 +67,36 @@ export const TaskList = ({ token }: Props) => {
   }
 
   return (
-    <div style={{ marginTop: "20px" }}>
-      <h2>今日のタスク</h2>
-      <ul>
+    <div className="task-container">
+      <div className="task-list">
         {todayTasks.map((task) => (
-          <li key={task.id}>
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => handleToggle(task.id, task.completed)}
-            />
-            {task.title}
+          <div key={task.id} className="task-row">
+            <div className="task-left">
+              <input
+                type="checkbox"
+                checked={task.completed}
+                onChange={() => handleToggle(task.id, task.completed)}
+              />
 
-            <button onClick={() => openModal(task)}>編集</button>
-            <button onClick={() => handleDelete(task.id)}>削除</button>
-          </li>
+              <span className="task-title" title={task.title}>
+                {task.title}
+              </span>
+            </div>
+
+            <div className="task-actions">
+              <button className="button-with-icon" onClick={() => openModal(task)}>
+                <Pencil size={16} />
+                編集
+              </button>
+              <button className="button-with-icon delete" onClick={() => handleDelete(task.id)}>
+                <Trash2 size={16} />
+                削除
+              </button>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
 
-      {/* タスク追加 */}
       <TaskAdd token={token} onTaskAdded={loadTasks} />
 
       <EditTaskModal

@@ -1,3 +1,5 @@
+import "../components/TaskList.css"
+import { LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { TaskList } from "../components/TaskList";
 import type { ErrorDetail } from "../types/error";
@@ -122,32 +124,35 @@ export const Login = () => {
           padding: "24px",
           border: "1px solid #ccc",
           borderRadius: "8px",
-          width: "300px",
+          width: "400px",
         }}
       >
 
-        <h1 style={{ textAlign: "center", fontSize: "40px" }}>ログイン</h1>
-
         {user ? (
           <>
-            <p style={{ marginTop: "12px", textAlign: "center" }}>こんにちは、{user.name}さん</p>
+            <div className="header">
+              <h1>今日のタスク</h1>
+              <button 
+                className="button-with-icon logout"
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  setUser(null);
+                  setToken(null);
+                }}
+              >
+                <LogOut size={14} />
+                ログアウト
+              </button>
+            </div>
+
+            <p className="greeting">こんにちは、{user.name}さん</p>
 
             {token && <TaskList token={token} />}
-
-            <button
-              style={{ marginTop: "12px" }}
-              onClick={() => {
-                localStorage.removeItem("token");
-                setUser(null);
-                setToken(null);
-              }}
-            >
-            ログアウト
-          </button>
           </>
           
         ) : (
           <>
+            <h1 style={{ textAlign: "center", fontSize: "40px" }}>ログイン</h1>
             <input
               style={{
                 width: "100%",
