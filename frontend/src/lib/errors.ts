@@ -1,6 +1,11 @@
 import type { ErrorCode } from "../constants/errorCodes";
 
-type ClientErrorCode = "NETWORK_ERROR";
+export const CLIENT_ERROR_CODES = {
+  NETWORK_ERROR: "NETWORK_ERROR",
+} as const;
+
+export type ClientErrorCode =
+  (typeof CLIENT_ERROR_CODES)[keyof typeof CLIENT_ERROR_CODES];
 
 export type AppErrorCode = ErrorCode | ClientErrorCode;
 
