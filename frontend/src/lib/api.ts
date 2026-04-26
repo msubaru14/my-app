@@ -131,7 +131,7 @@ export const updateTask = async (
   task: Task,
   token: string
 ) => {
-  await fetch(`http://localhost:8080/tasks/${task.id}`, {
+  const res = await fetch(`http://localhost:8080/tasks/${task.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -143,6 +143,14 @@ export const updateTask = async (
       completed: task.completed,
     }),
   });
+
+  const json = await res.json();
+
+  if (json.error) {
+    throw new ApiError(json.error.code);
+  }
+
+  return json.data.task;
 }
 
 // DELETE /tasks/:id
