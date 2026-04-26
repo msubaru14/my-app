@@ -1,9 +1,7 @@
 import type { Task } from "../types/task";
 import { ERROR_CODES } from "../constants/errorCodes";
 import type { ErrorCode } from "../constants/errorCodes";
-import { ApiError } from "./errors";
-
-const NETWORK_ERROR = "NETWORK_ERROR" as const;
+import { CLIENT_ERROR_CODES, ApiError } from "./errors";
 
 const isErrorCode = (value: unknown): value is ErrorCode => {
   return (
@@ -26,7 +24,7 @@ const requestJson = async (url: string, init?: RequestInit) => {
   try {
     res = await fetch(url, init);
   } catch {
-    throw new ApiError(NETWORK_ERROR, "Network error");
+    throw new ApiError(CLIENT_ERROR_CODES.NETWORK_ERROR, "Network error");
   }
 
   if (!res.ok) {

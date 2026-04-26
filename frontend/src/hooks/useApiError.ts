@@ -1,5 +1,5 @@
 import { ERROR_CODES } from "../constants/errorCodes";
-import { ApiError } from "../lib/errors";
+import { CLIENT_ERROR_CODES, ApiError } from "../lib/errors";
 
 export type ApiErrorResult =
   | { type: "redirect"; to: string }
@@ -16,7 +16,7 @@ const resolveError = (error: unknown): ApiErrorResult => {
       return { type: "redirect", to: "/login" };
     case ERROR_CODES.VALIDATION_ERROR:
       return { type: "validation", details: error.details };
-    case "NETWORK_ERROR":
+    case CLIENT_ERROR_CODES.NETWORK_ERROR:
       return { type: "message", message: "通信エラーが発生しました" };
     default:
       return { type: "message", message: "エラーが発生しました" };
