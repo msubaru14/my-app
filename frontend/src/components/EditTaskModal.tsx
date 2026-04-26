@@ -1,3 +1,4 @@
+import "./EditTaskModal.css"
 import { useEffect, useState } from "react"
 import { updateTask } from "../lib/api"
 import type { Task } from "../types/task"
@@ -31,6 +32,20 @@ export default function EditTaskModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task])
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleEsc)
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEsc)
+    }
+  }, [isOpen, onClose])
+
   if (!isOpen || !task) return null
 
   const handleSave = async () => {
@@ -48,63 +63,50 @@ export default function EditTaskModal({
   }
 
   return (
-    <div style={overlayStyle}>
-      <div style={modalStyle}>
-        <h2>タスク編集</h2>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="modal-title">タスク編集</h2>
 
-        <div>
+        <div className="form-group">
           <label>タイトル</label>
           <input
+            className="input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label>期限</label>
           <input
+            className="input"
             type="date"
             value={dueDate ?? ""}
             onChange={(e) => setDueDate(e.target.value || null)}
           />
         </div>
 
-        <div>
-          <label>
+        <div className="checkbox-group">
+          <label>ステータス</label>
+          <div className="checkbox-row">
             <input
               type="checkbox"
               checked={completed}
               onChange={(e) => setCompleted(e.target.checked)}
             />
-            完了
-          </label>
+            <span>完了</span>
+          </div>
         </div>
 
-        <div style={{ marginTop: 16 }}>
-          <button onClick={handleSave}>保存</button>
-          <button onClick={onClose}>キャンセル</button>
+        <div className="modal-actions">
+          <button className="cancel" onClick={onClose}>
+            キャンセル
+          </button>
+          <button className="save" onClick={handleSave}>
+            保存
+          </button>
         </div>
       </div>
     </div>
   )
-}
-
-// 簡易スタイル
-const overlayStyle: React.CSSProperties = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0,0,0,0.3)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-}
-
-const modalStyle: React.CSSProperties = {
-  background: "#fff",
-  padding: 20,
-  borderRadius: 8,
-  width: 300,
 }
