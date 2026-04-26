@@ -27,10 +27,6 @@ const requestJson = async (url: string, init?: RequestInit) => {
     throw new ApiError(CLIENT_ERROR_CODES.NETWORK_ERROR, "Network error");
   }
 
-  if (!res.ok) {
-    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Request failed");
-  }
-
   const json = await parseJsonOrThrow(res);
 
   if (json?.error) {
@@ -41,6 +37,10 @@ const requestJson = async (url: string, init?: RequestInit) => {
       typeof json.error.message === "string" ? json.error.message : code;
 
     throw new ApiError(code, message, json.error.details);
+  }
+
+  if (!res.ok) {
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Request failed");
   }
 
   return json;
@@ -66,6 +66,25 @@ export const createUser = async (
   });
 
   return json.data.user;
+};
+
+// POST /login
+export const login = async (
+  email: string,
+  password: string
+) => {
+  const json = await requestJson("http://localhost:8080/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
+
+  return json.data;
 };
 
 // GET /me
