@@ -34,20 +34,18 @@ export const Login = () => {
 
       switch (result.type) {
         case "redirect":
-          console.log('redirect');
           navigate(result.to);
           break;
 
         case "validation": {
-          console.log('validation');
-          const details = (result.details as ValidationDetail[] | undefined) ?? [];
-          setFieldErrors(details.map((d) => d.message));
+          if (Array.isArray(result.details)) {
+            setFieldErrors(result.details.map((d) => d.message));
+          }
           setError("");
           break;
         }
 
         case "message":
-          console.log('message');
           setError(result.message);
           break;
       }
