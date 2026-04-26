@@ -1,13 +1,5 @@
 import type { Task } from "../types/task";
-
-export class ApiError extends Error {
-  code: string;
-
-  constructor(code: string) {
-    super(code);
-    this.code = code;
-  }
-}
+import { ApiError } from "./errors";
 
 // POST /users
 export const createUser = async (
