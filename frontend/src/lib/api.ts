@@ -3,6 +3,8 @@ import { ERROR_CODES } from "../constants/errorCodes";
 import type { ErrorCode } from "../constants/errorCodes";
 import { ApiError } from "./errors";
 
+const NETWORK_ERROR = "NETWORK_ERROR" as const;
+
 const isErrorCode = (value: unknown): value is ErrorCode => {
   return (
     typeof value === "string" &&
@@ -24,7 +26,11 @@ const requestJson = async (url: string, init?: RequestInit) => {
   try {
     res = await fetch(url, init);
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Network error");
+    throw new ApiError(NETWORK_ERROR, "Network error");
+  }
+
+  if (!res.ok) {
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Request failed");
   }
 
   const json = await parseJsonOrThrow(res);
