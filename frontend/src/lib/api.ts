@@ -1,5 +1,52 @@
 import type { Task } from "../types/task";
+import { ERROR_CODES } from "../constants/errorCodes";
+import type { ErrorCode } from "../constants/errorCodes";
 import { ApiError } from "./errors";
+
+const NETWORK_ERROR = "NETWORK_ERROR" as const;
+
+const isErrorCode = (value: unknown): value is ErrorCode => {
+  return (
+    typeof value === "string" &&
+    Object.values(ERROR_CODES).includes(value as ErrorCode)
+  );
+};
+
+const parseJsonOrThrow = async (res: Response) => {
+  try {
+    return await res.json();
+  } catch {
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid response format");
+  }
+};
+
+const requestJson = async (url: string, init?: RequestInit) => {
+  let res: Response;
+
+  try {
+    res = await fetch(url, init);
+  } catch {
+    throw new ApiError(NETWORK_ERROR, "Network error");
+  }
+
+  if (!res.ok) {
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Request failed");
+  }
+
+  const json = await parseJsonOrThrow(res);
+
+  if (json?.error) {
+    const code = isErrorCode(json.error.code)
+      ? json.error.code
+      : ERROR_CODES.INTERNAL_ERROR;
+    const message =
+      typeof json.error.message === "string" ? json.error.message : code;
+
+    throw new ApiError(code, message, json.error.details);
+  }
+
+  return json;
+};
 
 // POST /users
 export const createUser = async (
@@ -8,7 +55,7 @@ export const createUser = async (
   password: string
 ) => {
   console.log('create user');
-  const res = await fetch("http://localhost:8080/users", {
+  const json = await requestJson("http://localhost:8080/users", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -20,29 +67,17 @@ export const createUser = async (
     }),
   });
 
-  const json = await res.json();
-
-  if (json.error) {
-    throw new ApiError(json.error.code);
-  }
-
   return json.data.user;
 };
 
 // GET /me
 export const getMe = async (token: string) => {
   console.log('get me');
-  const res = await fetch("http://localhost:8080/me", {
+  const json = await requestJson("http://localhost:8080/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-
-  const json = await res.json();
-
-  if (json.error) {
-    throw new ApiError(json.error.code);
-  }
 
   return json.data.user;
 }
@@ -50,17 +85,11 @@ export const getMe = async (token: string) => {
 // GET /tasks
 export const fetchTasks = async (token: string) => {
   console.log('fetch tasks');
-  const res = await fetch("http://localhost:8080/tasks", {
+  const json = await requestJson("http://localhost:8080/tasks", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-
-  const json = await res.json();
-
-  if (json.error) {
-    throw new ApiError(json.error.code);
-  }
 
   return json.data.tasks;
 };
@@ -71,7 +100,7 @@ export const createTask = async (
   title: string,
   dueDate: string
 ) => {
-  const res = await fetch("http://localhost:8080/tasks", {
+  const json = await requestJson("http://localhost:8080/tasks", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -83,12 +112,6 @@ export const createTask = async (
     }),
   });
 
-  const json = await res.json();
-
-  if (json.error) {
-    throw new ApiError(json.error.code);
-  }
-
   return json.data.task;
 }
 
@@ -98,7 +121,7 @@ export const toggleTaskComplete = async (
   current: boolean,
   token: string
 ) => {
-  const res = await fetch(`http://localhost:8080/tasks/${id}`, {
+  const json = await requestJson(`http://localhost:8080/tasks/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -109,12 +132,6 @@ export const toggleTaskComplete = async (
     }),
   });
 
-  const json = await res.json();
-
-  if (json.error) {
-    throw new ApiError(json.error.code);
-  }
-
   return json.data.task;
 }
 
@@ -123,7 +140,7 @@ export const updateTask = async (
   task: Task,
   token: string
 ) => {
-  const res = await fetch(`http://localhost:8080/tasks/${task.id}`, {
+  const json = await requestJson(`http://localhost:8080/tasks/${task.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -136,27 +153,17 @@ export const updateTask = async (
     }),
   });
 
-  const json = await res.json();
-
-  if (json.error) {
-    throw new ApiError(json.error.code);
-  }
-
   return json.data.task;
 }
 
 // DELETE /tasks/:id
 export const deleteTask = async (id: number, token: string) => {
-  const res = await fetch(`http://localhost:8080/tasks/${id}`, {
+  const json = await requestJson(`http://localhost:8080/tasks/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  })
+  });
 
-  if (!res.ok) {
-    throw new Error("削除に失敗しました")
-  }
-
-  return res.json()
+  return json;
 }
