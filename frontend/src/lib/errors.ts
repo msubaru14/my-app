@@ -1,11 +1,15 @@
 import type { ErrorCode } from "../constants/errorCodes";
 
+type ClientErrorCode = "NETWORK_ERROR";
+
+export type AppErrorCode = ErrorCode | ClientErrorCode;
+
 export class ApiError extends Error {
-  code: ErrorCode | "NETWORK_ERROR";
+  code: AppErrorCode;
   details?: unknown;
 
   constructor(
-    code: ErrorCode | "NETWORK_ERROR",
+    code: AppErrorCode,
     message: string,
     details?: unknown
   ) {
