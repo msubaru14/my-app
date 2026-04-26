@@ -1,9 +1,13 @@
 import { useState } from "react";
-import type { ErrorDetail } from "../types/error";
+import { useApiError } from "../hooks/useApiError";
 import { Link, useNavigate } from "react-router-dom"
-
 import { AuthCard } from "../components/AuthCard";
 import { FormField } from "../components/FormField";
+import { login } from "../lib/api";
+
+type ValidationDetail = {
+  message: string;
+};
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +16,7 @@ export const Login = () => {
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate()
+  const { resolveError } = useApiError();
 
   const handleLogin = async () => {
     setError("");
@@ -19,42 +24,33 @@ export const Login = () => {
     setLoading(true);
     
     try {
-      const res = await fetch("http://localhost:8080/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const data = await login(email, password);
 
-      const json = await res.json();
-
-      if (json.error) {
-        // バリデーションエラー
-        if (json.error.code === "VALIDATION_ERROR") {
-          const details = Array.isArray(json.error.details) ? json.error.details : [];
-          const messages = details.map((d: ErrorDetail) => d.message);
-
-          setFieldErrors(messages);
-          setError("");
-          return;
-        }
-
-        // 認証エラー
-        if (json.error.code === "UNAUTHORIZED") {
-          setError("メールアドレスまたはパスワードが違います");
-          return;
-        }
-
-        // その他
-        setError("ログイン失敗");
-        return;
-      }
-
-      localStorage.setItem("token", json.data.token);
+      localStorage.setItem("token", data.token);
       navigate("/tasks")
-    } catch {
-      setError("通信エラー");
+
+    } catch(err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          console.log('redirect');
+          navigate(result.to);
+          break;
+
+        case "validation": {
+          console.log('validation');
+          const details = (result.details as ValidationDetail[] | undefined) ?? [];
+          setFieldErrors(details.map((d) => d.message));
+          setError("");
+          break;
+        }
+
+        case "message":
+          console.log('message');
+          setError(result.message);
+          break;
+      }
     } finally {
       setLoading(false);
     }
