@@ -5,10 +5,6 @@ import { AuthCard } from "../components/AuthCard";
 import { FormField } from "../components/FormField";
 import { login } from "../lib/api";
 
-type ValidationDetail = {
-  message: string;
-};
-
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

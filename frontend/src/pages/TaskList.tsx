@@ -5,7 +5,8 @@ import type { Task } from "../types/task";
 import { getMe, fetchTasks, toggleTaskComplete, deleteTask } from "../lib/api";
 import { TaskAdd } from "../components/TaskAdd";
 import EditTaskModal from "../components/EditTaskModal"
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
+import { useApiError } from "../hooks/useApiError";
 
 type User = {
   id: number;
@@ -27,16 +28,36 @@ export const TaskList = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [user, setUser] = useState<User | null>(null);
+  const { resolveError } = useApiError();
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
-  
 
-  const loadTasks = useCallback(() => {
+  const loadTasks = useCallback(async () => {
     if (!token) return;
 
-    getMe(token).then(setUser).catch(console.error);
-    fetchTasks(token).then(setTasks).catch(console.error);
-  }, [token]);
+    try {
+      const me = await getMe(token);
+      setUser(me);
+
+      const tasks = await fetchTasks(token);
+      setTasks(tasks);
+    } catch (err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+        case "message":
+          console.error(result.message);
+          break;
+        case "validation":
+          console.error(result.details);
+          break;
+      }
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     loadTasks();
@@ -50,22 +71,34 @@ export const TaskList = () => {
     try {
       await toggleTaskComplete(id, current, token);
       await loadTasks();
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      const result = resolveError(err);
+
+      if (result.type === "redirect") {
+        navigate(result.to);
+      } else {
+        console.error(result);
+      }
     }
   };
 
   const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("このタスクを削除しますか？")
+    const confirmed = window.confirm("このタスクを削除しますか？");
 
-    if (!confirmed) return
+    if (!confirmed) return;
 
     try {
-      await deleteTask(id, token)
-      await loadTasks()
-    } catch (e) {
-      console.error(e)
-      alert("削除に失敗しました")
+      await deleteTask(id, token);
+      await loadTasks();
+    } catch (err) {
+      const result = resolveError(err);
+
+      if (result.type === "redirect") {
+        navigate(result.to);
+        return;
+      }
+
+      alert("削除に失敗しました");
     }
   }
 
