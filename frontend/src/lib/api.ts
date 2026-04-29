@@ -88,7 +88,9 @@ export const login = async (
 };
 
 // GET /me
-export const getMe = async (token: string) => {
+export const getMe = async () => {
+  const token = localStorage.getItem("token");
+
   console.log('get me');
   const json = await requestJson("http://localhost:8080/me", {
     headers: {
@@ -100,7 +102,9 @@ export const getMe = async (token: string) => {
 }
 
 // GET /tasks
-export const fetchTasks = async (token: string) => {
+export const fetchTasks = async () => {
+  const token = localStorage.getItem("token");
+
   console.log('fetch tasks');
   const json = await requestJson("http://localhost:8080/tasks", {
     headers: {
@@ -113,10 +117,11 @@ export const fetchTasks = async (token: string) => {
 
 // POST /tasks
 export const createTask = async (
-  token: string,
   title: string,
   dueDate: string
 ) => {
+  const token = localStorage.getItem("token");
+
   const json = await requestJson("http://localhost:8080/tasks", {
     method: "POST",
     headers: {
@@ -136,8 +141,9 @@ export const createTask = async (
 export const toggleTaskComplete = async (
   id: number,
   current: boolean,
-  token: string
 ) => {
+  const token = localStorage.getItem("token");
+
   const json = await requestJson(`http://localhost:8080/tasks/${id}`, {
     method: "PATCH",
     headers: {
@@ -155,8 +161,9 @@ export const toggleTaskComplete = async (
 // PATCH /tasks/:id (タスク編集)
 export const updateTask = async (
   task: Task,
-  token: string
 ) => {
+  const token = localStorage.getItem("token");
+
   const json = await requestJson(`http://localhost:8080/tasks/${task.id}`, {
     method: "PATCH",
     headers: {
@@ -174,7 +181,9 @@ export const updateTask = async (
 }
 
 // DELETE /tasks/:id
-export const deleteTask = async (id: number, token: string) => {
+export const deleteTask = async (id: number) => {
+  const token = localStorage.getItem("token");
+
   const json = await requestJson(`http://localhost:8080/tasks/${id}`, {
     method: "DELETE",
     headers: {

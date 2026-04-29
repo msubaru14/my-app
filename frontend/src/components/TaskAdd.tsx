@@ -5,12 +5,11 @@ import { useApiError } from "../hooks/useApiError";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
-  token: string;
   onTaskAdded: () => void;
 };
 
 // タスク追加
-export const TaskAdd = ({ token, onTaskAdded }: Props) => {
+export const TaskAdd = ({ onTaskAdded }: Props) => {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const { resolveError } = useApiError();
@@ -24,7 +23,7 @@ export const TaskAdd = ({ token, onTaskAdded }: Props) => {
 
     // タスク追加API
     try {
-      await createTask(token, title, dueDate);
+      await createTask(title, dueDate);
 
       setTitle("");
       setDueDate("");
