@@ -1,7 +1,8 @@
 import "./TaskList.css"
 import { useState } from "react";
 import { createTask } from "../lib/api";
-import { ApiError } from "../lib/errors";
+import { useApiError } from "../hooks/useApiError";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   token: string;
@@ -12,6 +13,8 @@ type Props = {
 export const TaskAdd = ({ token, onTaskAdded }: Props) => {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const { resolveError } = useApiError();
+  const navigate = useNavigate();
 
   const handleTaskAdd = async () => {
     if (!title.trim()) {
@@ -27,21 +30,22 @@ export const TaskAdd = ({ token, onTaskAdded }: Props) => {
       setDueDate("");
 
       onTaskAdded();
-    } catch (e: unknown) {
-      console.error(e);
-      if (e instanceof ApiError) {
-        if (e.message === "VALIDATION_ERROR") {
+    } catch (err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+
+        case "validation":
           alert("入力内容に問題があります");
-          return;
-        }
+          break;
 
-        if (e.message === "UNAUTHORIZED") {
-          alert("ログインが必要です");
-          return;
-        }
+        case "message":
+          alert("タスク追加失敗");
+          break;
       }
-
-      alert("タスク追加失敗");
     }
   };
 
