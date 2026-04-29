@@ -2,7 +2,7 @@ import "./App.css"
 import { Routes, Route, Navigate } from "react-router-dom"
 import { Register } from "./pages/Register"
 import { Login } from "./pages/Login"
-import { TaskList } from "./pages/TaskList"
+import { TaskList } from "./features/tasks/components/TaskList"
 
 
 export const App = () => {
