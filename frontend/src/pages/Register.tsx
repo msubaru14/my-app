@@ -1,17 +1,16 @@
 import { useState } from "react"
 import { createUser } from "../lib/api"
 import { useNavigate, Link } from "react-router-dom"
-
 import { AuthCard } from "../components/AuthCard";
 import { FormField } from "../components/FormField";
-
+import { useApiError } from "../hooks/useApiError";
 
 export const Register = () => {
-  const navigate = useNavigate()
-
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const { resolveError } = useApiError();
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,11 +26,23 @@ export const Register = () => {
     }
 
     try {
-      await createUser(name, email, password)
-      navigate("/")
-    } catch (e) {
-      console.error(e)
-      alert("登録に失敗しました")
+      await createUser(name, email, password);
+      navigate("/");
+    } catch (err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+
+        case "validation":
+          break;
+
+        case "message":
+          alert("登録に失敗しました");
+          break;
+      }
     }
   }
 
