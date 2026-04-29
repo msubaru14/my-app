@@ -8,7 +8,6 @@ type Props = {
   onClose: () => void
   task: Task | null
   onUpdated: () => void
-  token: string;
 }
 
 export default function EditTaskModal({
@@ -16,7 +15,6 @@ export default function EditTaskModal({
   onClose,
   task,
   onUpdated,
-  token
 }: Props) {
   const [title, setTitle] = useState("")
   const [dueDate, setDueDate] = useState<string | null>(null)
@@ -56,7 +54,7 @@ export default function EditTaskModal({
       completed,
     }
 
-    await updateTask(payload, token)
+    await updateTask(payload)
 
     onClose()
     await onUpdated()

@@ -22,6 +22,9 @@ const getTodayString = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+
+
+
 // 今日のタスク一覧
 export const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -32,15 +35,16 @@ export const TaskList = () => {
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
 
   const loadTasks = useCallback(async () => {
-    if (!token) return;
-
     try {
-      const me = await getMe(token);
+      const me = await getMe();
       setUser(me);
 
-      const tasks = await fetchTasks(token);
+      const tasks = await fetchTasks();
       setTasks(tasks);
     } catch (err) {
       const result = resolveError(err);
@@ -57,19 +61,15 @@ export const TaskList = () => {
           break;
       }
     }
-  }, [token, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
     loadTasks();
   }, [loadTasks]);
 
-  if (!token) {
-    return <Navigate to="/login" />
-  }
-
   const handleToggle = async (id: number, current: boolean) => {
     try {
-      await toggleTaskComplete(id, current, token);
+      await toggleTaskComplete(id, current);
       await loadTasks();
     } catch (err) {
       const result = resolveError(err);
@@ -88,7 +88,7 @@ export const TaskList = () => {
     if (!confirmed) return;
 
     try {
-      await deleteTask(id, token);
+      await deleteTask(id);
       await loadTasks();
     } catch (err) {
       const result = resolveError(err);
@@ -164,10 +164,9 @@ export const TaskList = () => {
           ))}
         </div>
 
-        <TaskAdd token={token} onTaskAdded={loadTasks} />
+        <TaskAdd onTaskAdded={loadTasks} />
 
         <EditTaskModal
-          token={token}
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           task={selectedTask}
