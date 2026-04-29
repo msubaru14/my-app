@@ -1,7 +1,7 @@
-import "./TaskList.css"
+import "../../../components/TaskList.css"
 import { useState } from "react";
-import { createTask } from "../lib/api";
-import { useApiError } from "../hooks/useApiError";
+import { createTask } from "../../../lib/api";
+import { useApiError } from "../../../hooks/useApiError";
 import { useNavigate } from "react-router-dom";
 
 type Props = {

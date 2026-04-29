@@ -3,7 +3,7 @@ import { Pencil, Trash2, LogOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../../../types/task";
 import { getMe, fetchTasks, toggleTaskComplete, deleteTask } from "../../../lib/api";
-import { TaskAdd } from "../../../components/TaskAdd";
+import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "../../../components/EditTaskModal"
 import { Navigate, useNavigate } from "react-router-dom"
 import { useApiError } from "../../../hooks/useApiError";
