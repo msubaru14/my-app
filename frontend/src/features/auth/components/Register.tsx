@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { createUser } from "../lib/api"
+import { createUser } from "../../../lib/api"
 import { useNavigate, Link } from "react-router-dom"
-import { AuthCard } from "../features/auth/components/AuthCard";
-import { FormField } from "../features/auth/components/FormField";
-import { useApiError } from "../hooks/useApiError";
+import { AuthCard } from "./AuthCard";
+import { FormField } from "./FormField";
+import { useApiError } from "../../../hooks/useApiError";
 
 export const Register = () => {
   const [name, setName] = useState("")
