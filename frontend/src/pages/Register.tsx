@@ -2,7 +2,7 @@ import { useState } from "react"
 import { createUser } from "../lib/api"
 import { useNavigate, Link } from "react-router-dom"
 import { AuthCard } from "../features/auth/components/AuthCard";
-import { FormField } from "../components/FormField";
+import { FormField } from "../features/auth/components/FormField";
 import { useApiError } from "../hooks/useApiError";
 
 export const Register = () => {
