@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApiError } from "../hooks/useApiError";
 import { Link, useNavigate } from "react-router-dom"
-import { AuthCard } from "../components/AuthCard";
+import { AuthCard } from "../features/auth/components/AuthCard";
 import { FormField } from "../components/FormField";
 import { login } from "../lib/api";
 
