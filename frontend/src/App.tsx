@@ -1,7 +1,7 @@
 import "./App.css"
 import { Routes, Route, Navigate } from "react-router-dom"
 import { Register } from "./pages/Register"
-import { Login } from "./pages/Login"
+import { Login } from "./features/auth/components/Login"
 import { TaskList } from "./features/tasks/components/TaskList"
 
 

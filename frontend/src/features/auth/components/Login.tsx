@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useApiError } from "../hooks/useApiError";
+import { useApiError } from "../../../hooks/useApiError";
 import { Link, useNavigate } from "react-router-dom"
-import { AuthCard } from "../features/auth/components/AuthCard";
-import { FormField } from "../features/auth/components/FormField";
-import { login } from "../lib/api";
+import { AuthCard } from "./AuthCard";
+import { FormField } from "./FormField";
+import { login } from "../../../lib/api";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
