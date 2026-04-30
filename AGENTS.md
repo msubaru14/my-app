@@ -206,6 +206,22 @@ Do NOT:
 
 ---
 
+## ■ Git Workflow Rules
+
+* Always create a new branch from latest main
+* Do not reuse old branches
+* 1 branch = 1 purpose
+* Verify diff before PR (`git diff origin/main`)
+* Trust GitHub PR diff over local diff
+* If history is broken, create a new branch
+
+Do NOT:
+
+* Mix multiple changes in one branch
+* Commit unrelated files
+
+---
+
 ## ■ Reporting Rules
 
 After task completion, report:
@@ -232,6 +248,14 @@ Codex must follow the repository PR template.
 If any checklist item cannot be confirmed:
 
 * Report explicitly
+
+---
+
+## Encoding Rules
+
+* Markdown, TypeScript, JavaScript, CSS, JSON, and Go files are UTF-8.
+* When reading files in PowerShell, use `Get-Content -Encoding UTF8` for text files that may contain Japanese.
+* Do not treat mojibake from the terminal output as file corruption until the file has been re-read as UTF-8.
 
 ---
 
