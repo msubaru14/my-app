@@ -2,7 +2,7 @@ import "../../../components/common.css"
 import "./EditTaskModal.css"
 import { useEffect, useState } from "react"
 import { updateTask } from "../../../lib/api"
-import type { Task } from "../../../types/task"
+import type { Task } from "../types/task"
 import { useApiError } from "../../../hooks/useApiError";
 import { useNavigate } from "react-router-dom";
 

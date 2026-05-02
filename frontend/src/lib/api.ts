@@ -1,4 +1,4 @@
-import type { Task } from "../types/task";
+import type { Task } from "../features/tasks/types/task";
 import { ERROR_CODES } from "../constants/errorCodes";
 import type { ErrorCode } from "../constants/errorCodes";
 import { CLIENT_ERROR_CODES, ApiError } from "./errors";
