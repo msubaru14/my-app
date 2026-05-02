@@ -3,7 +3,8 @@ import "./TaskList.css"
 import { Pencil, Trash2, LogOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../types/task";
-import { getMe, fetchTasks, toggleTaskComplete, deleteTask } from "../../../lib/api";
+import { getMe } from "../../../lib/api";
+import { fetchTasks, toggleTaskComplete, deleteTask } from "../api/tasksApi";
 import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
 import { Navigate, useNavigate } from "react-router-dom"
