@@ -1,4 +1,5 @@
-import "../../../components/TaskList.css"
+import "../../../components/common.css"
+import "./TaskList.css"
 import { useState } from "react";
 import { createTask } from "../../../lib/api";
 import { useApiError } from "../../../hooks/useApiError";
