@@ -1,4 +1,4 @@
-import { requestJson } from "../../../lib/api";
+import { requestJson, API_BASE_URL } from "../../../lib/api";
 import type { Task } from "../types/task";
 
 // GET /tasks
@@ -6,7 +6,7 @@ export const fetchTasks = async () => {
   const token = localStorage.getItem("token");
 
   console.log('fetch tasks');
-  const json = await requestJson("http://localhost:8080/tasks", {
+  const json = await requestJson(`${API_BASE_URL}/tasks`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -22,7 +22,7 @@ export const createTask = async (
 ) => {
   const token = localStorage.getItem("token");
 
-  const json = await requestJson("http://localhost:8080/tasks", {
+  const json = await requestJson(`${API_BASE_URL}/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +44,7 @@ export const toggleTaskComplete = async (
 ) => {
   const token = localStorage.getItem("token");
 
-  const json = await requestJson(`http://localhost:8080/tasks/${id}`, {
+  const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -64,7 +64,7 @@ export const updateTask = async (
 ) => {
   const token = localStorage.getItem("token");
 
-  const json = await requestJson(`http://localhost:8080/tasks/${task.id}`, {
+  const json = await requestJson(`${API_BASE_URL}/tasks/${task.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -84,7 +84,7 @@ export const updateTask = async (
 export const deleteTask = async (id: number) => {
   const token = localStorage.getItem("token");
 
-  const json = await requestJson(`http://localhost:8080/tasks/${id}`, {
+  const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
