@@ -6,6 +6,10 @@ export const API_BASE_URL = "http://localhost:8080";
 
 export const getToken = () => localStorage.getItem("token");
 
+export const getAuthHeaders = () => ({
+  Authorization: `Bearer ${getToken()}`,
+});
+
 const isErrorCode = (value: unknown): value is ErrorCode => {
   return (
     typeof value === "string" &&

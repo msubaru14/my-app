@@ -1,15 +1,11 @@
-import { requestJson, API_BASE_URL, getToken } from "../../../lib/api";
+import { requestJson, API_BASE_URL, getAuthHeaders } from "../../../lib/api";
 import type { Task } from "../types/task";
 
 // GET /tasks
 export const fetchTasks = async () => {
-  const token = getToken();
-
   console.log('fetch tasks');
   const json = await requestJson(`${API_BASE_URL}/tasks`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
   });
 
   return json.data.tasks;
@@ -20,13 +16,11 @@ export const createTask = async (
   title: string,
   dueDate: string
 ) => {
-  const token = getToken();
-
   const json = await requestJson(`${API_BASE_URL}/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      ...getAuthHeaders(),
     },
     body: JSON.stringify({
       title,
@@ -42,13 +36,11 @@ export const toggleTaskComplete = async (
   id: number,
   current: boolean,
 ) => {
-  const token = getToken();
-
   const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      ...getAuthHeaders(),
     },
     body: JSON.stringify({
       completed: !current,
@@ -62,13 +54,11 @@ export const toggleTaskComplete = async (
 export const updateTask = async (
   task: Task,
 ) => {
-  const token = getToken();
-
   const json = await requestJson(`${API_BASE_URL}/tasks/${task.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      ...getAuthHeaders(),
     },
     body: JSON.stringify({
       title: task.title,
@@ -82,13 +72,9 @@ export const updateTask = async (
 
 // DELETE /tasks/:id
 export const deleteTask = async (id: number) => {
-  const token = getToken();
-
   const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
   });
 
   return json;

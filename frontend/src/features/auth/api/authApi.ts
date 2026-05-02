@@ -1,4 +1,4 @@
-import { requestJson, API_BASE_URL, getToken } from "../../../lib/api";
+import { requestJson, API_BASE_URL, getAuthHeaders } from "../../../lib/api";
 
 // POST /users
 export const createUser = async (
@@ -43,13 +43,9 @@ export const login = async (
 
 // GET /me
 export const getMe = async () => {
-  const token = getToken();
-
   console.log('get me');
   const json = await requestJson(`${API_BASE_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
   });
 
   return json.data.user;
