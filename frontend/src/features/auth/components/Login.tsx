@@ -4,7 +4,7 @@ import { useApiError } from "../../../hooks/useApiError";
 import { Link, useNavigate } from "react-router-dom"
 import { AuthCard } from "./AuthCard";
 import { FormField } from "./FormField";
-import { login } from "../../../lib/api";
+import { login } from "../api/authApi";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
