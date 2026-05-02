@@ -1,4 +1,4 @@
-import { requestJson, API_BASE_URL } from "../../../lib/api";
+import { requestJson, API_BASE_URL, getToken } from "../../../lib/api";
 
 // POST /users
 export const createUser = async (
@@ -43,7 +43,7 @@ export const login = async (
 
 // GET /me
 export const getMe = async () => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   console.log('get me');
   const json = await requestJson(`${API_BASE_URL}/me`, {

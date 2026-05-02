@@ -1,9 +1,9 @@
-import { requestJson, API_BASE_URL } from "../../../lib/api";
+import { requestJson, API_BASE_URL, getToken } from "../../../lib/api";
 import type { Task } from "../types/task";
 
 // GET /tasks
 export const fetchTasks = async () => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   console.log('fetch tasks');
   const json = await requestJson(`${API_BASE_URL}/tasks`, {
@@ -20,7 +20,7 @@ export const createTask = async (
   title: string,
   dueDate: string
 ) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   const json = await requestJson(`${API_BASE_URL}/tasks`, {
     method: "POST",
@@ -42,7 +42,7 @@ export const toggleTaskComplete = async (
   id: number,
   current: boolean,
 ) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "PATCH",
@@ -62,7 +62,7 @@ export const toggleTaskComplete = async (
 export const updateTask = async (
   task: Task,
 ) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   const json = await requestJson(`${API_BASE_URL}/tasks/${task.id}`, {
     method: "PATCH",
@@ -82,7 +82,7 @@ export const updateTask = async (
 
 // DELETE /tasks/:id
 export const deleteTask = async (id: number) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "DELETE",
