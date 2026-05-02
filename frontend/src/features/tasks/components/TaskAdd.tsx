@@ -1,7 +1,7 @@
 import "../../../components/common.css"
 import "./TaskList.css"
 import { useState } from "react";
-import { createTask } from "../../../lib/api";
+import { createTask } from "../api/tasksApi";
 import { useApiError } from "../../../hooks/useApiError";
 import { useNavigate } from "react-router-dom";
 
