@@ -1,4 +1,5 @@
-import "../../../components/TaskList.css"
+import "../../../components/common.css"
+import "./TaskList.css"
 import { Pencil, Trash2, LogOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../../../types/task";

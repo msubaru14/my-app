@@ -1,3 +1,4 @@
+import "../../../components/common.css"
 import { useState } from "react";
 import { useApiError } from "../../../hooks/useApiError";
 import { Link, useNavigate } from "react-router-dom"
