@@ -252,6 +252,16 @@ If any checklist item cannot be confirmed:
 
 ---
 
+## ■ Issue Template Integration
+
+When creating a bug report issue, Codex must follow the repository bug report template.
+
+* The bug report template is located at `.github/ISSUE_TEMPLATE/bug_report.md`; read this file directly before creating a bug report issue.
+* Fill in the issue using the template sections.
+* Do not mix bug reports with refactoring or feature tasks.
+
+---
+
 ## Encoding Rules
 
 * Markdown, TypeScript, JavaScript, CSS, JSON, and Go files are UTF-8.
