@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { createUser } from "../../../lib/api"
+import { createUser } from "../api/authApi"
 import { useNavigate, Link } from "react-router-dom"
 import { AuthCard } from "./AuthCard";
 import { FormField } from "./FormField";
