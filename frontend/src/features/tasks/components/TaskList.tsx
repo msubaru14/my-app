@@ -2,7 +2,7 @@ import "../../../components/common.css"
 import "./TaskList.css"
 import { Pencil, Trash2, LogOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import type { Task } from "../../../types/task";
+import type { Task } from "../types/task";
 import { getMe, fetchTasks, toggleTaskComplete, deleteTask } from "../../../lib/api";
 import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
