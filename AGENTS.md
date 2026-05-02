@@ -240,6 +240,7 @@ After task completion, report:
 
 Codex must follow the repository PR template.
 
+* The PR template is located at `.github/pull_request_template.md`; read this file directly before creating a PR.
 * Ensure all required sections are filled
 * Ensure checklist items are verified
 * Ensure scope rules are satisfied
