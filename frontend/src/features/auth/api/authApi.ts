@@ -1,4 +1,4 @@
-import { requestJson } from "../../../lib/api";
+import { requestJson, API_BASE_URL } from "../../../lib/api";
 
 // POST /users
 export const createUser = async (
@@ -7,7 +7,7 @@ export const createUser = async (
   password: string
 ) => {
   console.log('create user');
-  const json = await requestJson("http://localhost:8080/users", {
+  const json = await requestJson(`${API_BASE_URL}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -27,7 +27,7 @@ export const login = async (
   email: string,
   password: string
 ) => {
-  const json = await requestJson("http://localhost:8080/login", {
+  const json = await requestJson(`${API_BASE_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export const getMe = async () => {
   const token = localStorage.getItem("token");
 
   console.log('get me');
-  const json = await requestJson("http://localhost:8080/me", {
+  const json = await requestJson(`${API_BASE_URL}/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

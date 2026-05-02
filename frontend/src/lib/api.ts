@@ -2,6 +2,8 @@ import { ERROR_CODES } from "../constants/errorCodes";
 import type { ErrorCode } from "../constants/errorCodes";
 import { CLIENT_ERROR_CODES, ApiError } from "./errors";
 
+export const API_BASE_URL = "http://localhost:8080";
+
 const isErrorCode = (value: unknown): value is ErrorCode => {
   return (
     typeof value === "string" &&
