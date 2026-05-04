@@ -34,11 +34,10 @@ export const TaskList = () => {
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
 
   const loadTasks = useCallback(async () => {
+    if (!token) return;
+
     try {
       const me = await getMe();
       setUser(me);
@@ -60,10 +59,10 @@ export const TaskList = () => {
           break;
       }
     }
-  }, [navigate]);
+  }, [navigate, resolveError, token]);
 
   useEffect(() => {
-    loadTasks();
+    void Promise.resolve().then(loadTasks);
   }, [loadTasks]);
 
   const handleToggle = async (id: number, current: boolean) => {
@@ -110,6 +109,10 @@ export const TaskList = () => {
   const openModal = (task: Task) => {
     setSelectedTask(task)
     setIsOpen(true)
+  }
+
+  if (!token) {
+    return <Navigate to="/login" />;
   }
 
   return (
