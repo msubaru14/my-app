@@ -25,10 +25,15 @@ const resolveError = (error: unknown): ApiErrorResult => {
       return { type: "redirect", to: "/login" };
     case ERROR_CODES.VALIDATION_ERROR: {
       const details = error.details;
+      const message =
+        details.length > 0
+          ? details.map((detail) => detail.message).join("\n")
+          : resolveMessage(error);
+
       return {
         type: "validation",
         details,
-        message: details.map((detail) => detail.message).join("\n"),
+        message,
       };
     }
     default:
