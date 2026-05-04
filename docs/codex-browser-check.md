@@ -37,6 +37,15 @@ cp backend/.env.example backend/.env
 
 ## Startup
 
+継続開発中は、既にローカル環境が起動している場合がある。
+`docker compose up` を実行する前に、まず以下の疎通を確認する。
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080`
+- CDP: `http://127.0.0.1:9335/json/version`
+
+Backendのroot pathが `404` を返しても、HTTP応答が返っている場合はサーバ自体は起動済みと判断できる。
+
 Repository rootで以下を実行する。
 
 ```bash
@@ -96,9 +105,12 @@ Invoke-RestMethod http://127.0.0.1:9335/json/version
 ### Operation Notes
 
 - 入力確認はDOMの `value` を直接変更するだけではなく、実入力イベントまたはReactに伝わる入力イベントで行う
+- Reactの入力確認では、native setterで値を更新し、`InputEvent` を発火させるとstateへ反映されやすい
 - ボタン押下はDOMの `click()` ではなく、座標に対するマウスイベントで確認する
+- `Input.dispatchMouseEvent` の応答待ちで停止する場合は、座標を算出したうえで対象要素へ `MouseEvent` を発火する代替手順を検討する
 - console確認では `Runtime.consoleAPICalled` と `Runtime.exceptionThrown` を確認する
 - API確認では `Network.responseReceived` を確認する
+- CDP操作をPowerShellのWebSocketで直接行うと不安定な場合があるため、外部依存を追加せずに済む場合はNode標準の `WebSocket` を使う
 - PowerShell経由でNodeスクリプトを実行する場合、日本語文字列の判定が文字化けすることがあるため、判定は可能な限りURL、CSS selector、ASCIIのテストデータで行う
 
 ## Change-Specific Checks
@@ -147,6 +159,7 @@ Invoke-RestMethod http://127.0.0.1:9335/json/version
 - request bodyが想定どおりである
 - response bodyがAPI仕様どおりである
 - エラー時は `code` / `message` / `details` を確認できる
+- `OPTIONS` の `204` はCORS preflightの可能性があるため、実APIのレスポンスとは分けて確認する
 
 APIレスポンス形式は `docs/api.md` を参照する。
 
