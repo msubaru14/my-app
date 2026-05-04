@@ -10,6 +10,10 @@ export const getAuthHeaders = () => ({
   Authorization: `Bearer ${getToken()}`,
 });
 
+export const getJsonHeaders = () => ({
+  "Content-Type": "application/json",
+});
+
 const isErrorCode = (value: unknown): value is ErrorCode => {
   return (
     typeof value === "string" &&

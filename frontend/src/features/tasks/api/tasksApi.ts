@@ -1,4 +1,9 @@
-import { requestJson, API_BASE_URL, getAuthHeaders } from "../../../lib/api";
+import {
+  requestJson,
+  API_BASE_URL,
+  getAuthHeaders,
+  getJsonHeaders,
+} from "../../../lib/api";
 import type { Task } from "../types/task";
 
 // GET /tasks
@@ -19,7 +24,7 @@ export const createTask = async (
   const json = await requestJson(`${API_BASE_URL}/tasks`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      ...getJsonHeaders(),
       ...getAuthHeaders(),
     },
     body: JSON.stringify({
@@ -39,7 +44,7 @@ export const toggleTaskComplete = async (
   const json = await requestJson(`${API_BASE_URL}/tasks/${id}`, {
     method: "PATCH",
     headers: {
-      "Content-Type": "application/json",
+      ...getJsonHeaders(),
       ...getAuthHeaders(),
     },
     body: JSON.stringify({
@@ -57,7 +62,7 @@ export const updateTask = async (
   const json = await requestJson(`${API_BASE_URL}/tasks/${task.id}`, {
     method: "PATCH",
     headers: {
-      "Content-Type": "application/json",
+      ...getJsonHeaders(),
       ...getAuthHeaders(),
     },
     body: JSON.stringify({
