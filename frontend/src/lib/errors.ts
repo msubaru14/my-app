@@ -9,9 +9,34 @@ export type ClientErrorCode =
 
 export type AppErrorCode = ErrorCode | ClientErrorCode;
 
+export type ValidationDetail = {
+  field?: string;
+  code?: string;
+  message: string;
+};
+
+const isValidationDetail = (detail: unknown): detail is ValidationDetail => {
+  return (
+    typeof detail === "object" &&
+    detail !== null &&
+    "message" in detail &&
+    typeof detail.message === "string"
+  );
+};
+
+export const normalizeValidationDetails = (
+  details: unknown
+): ValidationDetail[] => {
+  if (!Array.isArray(details)) {
+    return [];
+  }
+
+  return details.filter(isValidationDetail);
+};
+
 export class ApiError extends Error {
   code: AppErrorCode;
-  details?: unknown;
+  details: ValidationDetail[];
 
   constructor(
     code: AppErrorCode,
@@ -21,6 +46,6 @@ export class ApiError extends Error {
     super(message);
     this.name = "ApiError";
     this.code = code;
-    this.details = details;
+    this.details = normalizeValidationDetails(details);
   }
 }
