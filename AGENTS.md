@@ -222,6 +222,25 @@ Do NOT:
 
 ---
 
+## ■ Verification Rules
+
+When performing frontend browser operation checks, refer to `docs/codex-browser-check.md`.
+
+Use that document for:
+
+* Local startup assumptions
+* Browser operation method
+* Check points
+* Result reporting format
+
+If the document cannot be followed:
+
+* Report what could not be verified
+* Explain why
+* Do not guess the result
+
+---
+
 ## ■ Reporting Rules
 
 After task completion, report:
