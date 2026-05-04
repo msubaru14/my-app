@@ -101,6 +101,19 @@ Invoke-RestMethod http://127.0.0.1:9335/json/version
 - API確認では `Network.responseReceived` を確認する
 - PowerShell経由でNodeスクリプトを実行する場合、日本語文字列の判定が文字化けすることがあるため、判定は可能な限りURL、CSS selector、ASCIIのテストデータで行う
 
+## Change-Specific Checks
+
+標準シナリオに加えて、変更内容に応じた確認を行う。
+
+特に以下を確認する。
+
+- 変更した条件分岐の各パターン
+- 移動・整理した処理が担っていた防御動作
+- エラー時、未認証時、空データ時などの境界条件
+- 変更した処理の前後で維持すべき既存挙動
+
+確認しない場合は、理由を結果に残す。
+
 ## Check Points
 
 ### 1. Field Input
