@@ -25,7 +25,10 @@ const parseJsonOrThrow = async (res: Response) => {
   try {
     return await res.json();
   } catch {
-    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid response format");
+    throw new ApiError(
+      ERROR_CODES.INTERNAL_SERVER_ERROR,
+      "Invalid response format"
+    );
   }
 };
 
@@ -43,7 +46,7 @@ export const requestJson = async (url: string, init?: RequestInit) => {
   if (json?.error) {
     const code = isErrorCode(json.error.code)
       ? json.error.code
-      : ERROR_CODES.INTERNAL_ERROR;
+      : ERROR_CODES.INTERNAL_SERVER_ERROR;
     const message =
       typeof json.error.message === "string" ? json.error.message : code;
 
@@ -51,7 +54,7 @@ export const requestJson = async (url: string, init?: RequestInit) => {
   }
 
   if (!res.ok) {
-    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Request failed");
+    throw new ApiError(ERROR_CODES.INTERNAL_SERVER_ERROR, "Request failed");
   }
 
   return json;
