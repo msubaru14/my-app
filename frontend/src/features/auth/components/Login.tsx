@@ -35,9 +35,12 @@ export const Login = () => {
           break;
 
         case "validation": {
-          if (Array.isArray(result.details)) {
-            setFieldErrors(result.details.map((d) => d.message));
-          }
+          const messages =
+            result.details.length > 0
+              ? result.details.map((d) => d.message)
+              : [result.message];
+
+          setFieldErrors(messages);
           setError("");
           break;
         }
