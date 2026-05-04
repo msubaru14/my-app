@@ -231,7 +231,16 @@ Use that document for:
 * Local startup assumptions
 * Browser operation method
 * Check points
+* Change-specific checks
 * Result reporting format
+
+In addition to the standard scenario, verify behavior that matches the actual change.
+
+Examples:
+
+* Each branch of a changed condition
+* Guard behavior moved or reorganized by the change
+* Boundary cases such as unauthenticated, invalid token, empty data, and API error states
 
 If the document cannot be followed:
 
