@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../../auth/api/authApi";
-import { fetchTasks } from "../api/tasksApi";
+import { deleteTask, fetchTasks, toggleTaskComplete } from "../api/tasksApi";
 import type { Task } from "../types/task";
 import { useApiError } from "../../../hooks/useApiError";
 
@@ -53,10 +53,54 @@ export const useTaskListData = () => {
     setUser(null);
   };
 
+  const toggleTask = async (id: number, current: boolean) => {
+    try {
+      await toggleTaskComplete(id, current);
+      await loadTasks();
+    } catch (err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+        case "validation":
+          alert(result.message);
+          break;
+        case "message":
+          alert(result.message);
+          break;
+      }
+    }
+  };
+
+  const deleteTaskById = async (id: number) => {
+    try {
+      await deleteTask(id);
+      await loadTasks();
+    } catch (err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+        case "validation":
+          alert(result.message);
+          break;
+        case "message":
+          alert(result.message);
+          break;
+      }
+    }
+  }
+
   return {
     user,
     tasks,
     loadTasks,
     clearUser,
+    toggleTask,
+    deleteTaskById,
   };
 };

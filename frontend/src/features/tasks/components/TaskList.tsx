@@ -2,13 +2,11 @@ import "../../../components/common.css"
 import "./TaskList.css"
 import { useState } from "react";
 import type { Task } from "../types/task";
-import { toggleTaskComplete, deleteTask } from "../api/tasksApi";
 import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
 import { TaskListHeader } from "./TaskListHeader";
 import { TaskListItem } from "./TaskListItem";
-import { Navigate, useNavigate } from "react-router-dom"
-import { useApiError } from "../../../hooks/useApiError";
+import { Navigate } from "react-router-dom"
 import { filterTodayTasks } from "../utils/taskFilters";
 import { useTaskListData } from "../hooks/useTaskListData";
 
@@ -16,61 +14,23 @@ import { useTaskListData } from "../hooks/useTaskListData";
 export const TaskList = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const { resolveError } = useApiError();
-  const navigate = useNavigate();
   const {
     user,
     tasks,
     loadTasks,
     clearUser,
+    toggleTask,
+    deleteTaskById,
   } = useTaskListData();
 
   const token = localStorage.getItem("token");
-
-  const handleToggle = async (id: number, current: boolean) => {
-    try {
-      await toggleTaskComplete(id, current);
-      await loadTasks();
-    } catch (err) {
-      const result = resolveError(err);
-
-      switch (result.type) {
-        case "redirect":
-          navigate(result.to);
-          break;
-        case "validation":
-          alert(result.message);
-          break;
-        case "message":
-          alert(result.message);
-          break;
-      }
-    }
-  };
 
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm("このタスクを削除しますか？");
 
     if (!confirmed) return;
 
-    try {
-      await deleteTask(id);
-      await loadTasks();
-    } catch (err) {
-      const result = resolveError(err);
-
-      switch (result.type) {
-        case "redirect":
-          navigate(result.to);
-          break;
-        case "validation":
-          alert(result.message);
-          break;
-        case "message":
-          alert(result.message);
-          break;
-      }
-    }
+    await deleteTaskById(id);
   }
 
   const todayTasks = filterTodayTasks(tasks);
@@ -100,7 +60,7 @@ export const TaskList = () => {
             <TaskListItem
               key={task.id}
               task={task}
-              onToggle={handleToggle}
+              onToggle={toggleTask}
               onEdit={openModal}
               onDelete={handleDelete}
             />
