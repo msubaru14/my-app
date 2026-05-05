@@ -14,8 +14,9 @@ APIレスポンス仕様は docs/api.md に従う。
 - message の文字列で分岐しない
 - API error.message は表示候補として扱う
 - 表示メッセージは以下の優先順位で決定する
-  1. フロント固定文
-  2. API error.message
+  1. `ERROR_MESSAGES[error.code]` に定義されたフロント側メッセージ
+     - 汎用エラーメッセージを使う方針のコードもここに含む
+  2. API `error.message`
   3. 汎用エラーメッセージ
 
 ## ■ useApiError の役割
