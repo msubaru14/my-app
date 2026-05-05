@@ -38,12 +38,18 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
           navigate(result.to);
           break;
 
-        case "validation":
-          alert("入力内容に問題があります");
+        case "validation": {
+          const message =
+            result.details.length > 0
+              ? result.details.map((detail) => detail.message).join("\n")
+              : result.message;
+
+          alert(message);
           break;
+        }
 
         case "message":
-          alert("タスク追加失敗");
+          alert(result.message);
           break;
       }
     }
