@@ -9,19 +9,12 @@ import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
 import { Navigate, useNavigate } from "react-router-dom"
 import { useApiError } from "../../../hooks/useApiError";
+import { filterTodayTasks } from "../utils/taskFilters";
 
 type User = {
   id: number;
   name: string;
   email: string;
-};
-
-const getTodayString = () => {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 };
 
 // 今日のタスク一覧
@@ -111,11 +104,7 @@ export const TaskList = () => {
     }
   }
 
-  const todayStr = getTodayString();
-
-  const todayTasks = tasks.filter(
-    (task) => task.dueDate === todayStr
-  );
+  const todayTasks = filterTodayTasks(tasks);
 
   const openModal = (task: Task) => {
     setSelectedTask(task)
