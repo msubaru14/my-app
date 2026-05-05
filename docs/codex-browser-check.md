@@ -49,13 +49,19 @@ Backendのroot pathが `404` を返しても、HTTP応答が返っている場�
 Repository rootで以下を実行する。
 
 ```bash
-docker compose up --build -d
+docker compose up -d
 ```
 
 起動後、以下にアクセスできることを確認する。
 
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:8080`
+
+Dockerfile、依存関係、`package-lock.json`、Go modulesなど、コンテナイメージに影響する変更を確認する場合のみ再ビルドする。
+
+```bash
+docker compose up --build -d
+```
 
 ## Codex Browser Operation Requirements
 
@@ -105,17 +111,23 @@ Invoke-RestMethod http://127.0.0.1:9335/json/version
 ### Operation Notes
 
 - 入力確認はDOMの `value` を直接変更するだけではなく、実入力イベントまたはReactに伝わる入力イベントで行う
-- Reactの入力確認では、native setterで値を更新し、`InputEvent` を発火させるとstateへ反映されやすい
+- Reactの入力確認では、native setterで値を更新し、入力前の値を `_valueTracker` に反映してから `input` / `change` イベントを発火させるとstateへ反映されやすい
+- `input type="date"` の `value` は文字列として扱う。指定値は `YYYY-MM-DD` 形式（例: `2026-05-05`）を使い、`YYYY/MM/DD` 形式は使わない
 - ボタン押下はDOMの `click()` ではなく、座標に対するマウスイベントで確認する
 - `Input.dispatchMouseEvent` の応答待ちで停止する場合は、座標を算出したうえで対象要素へ `MouseEvent` を発火する代替手順を検討する
 - console確認では `Runtime.consoleAPICalled` と `Runtime.exceptionThrown` を確認する
 - API確認では `Network.responseReceived` を確認する
+- 小さなエラー分岐確認では、CDPの `Fetch.enable` による応答差し替えが不安定な場合がある。その場合はページ内で `window.fetch` と `window.alert` を一時的に差し替え、対象コンポーネントの分岐に渡る値を確認する
 - CDP操作をPowerShellのWebSocketで直接行うと不安定な場合があるため、外部依存を追加せずに済む場合はNode標準の `WebSocket` を使う
 - PowerShell経由でNodeスクリプトを実行する場合、日本語文字列の判定が文字化けすることがあるため、判定は可能な限りURL、CSS selector、ASCIIのテストデータで行う
 
 ## Change-Specific Checks
 
-標準シナリオに加えて、変更内容に応じた確認を行う。
+標準シナリオから変更に関係する操作を選び、既存挙動が壊れていないことを確認する。
+そのうえで、変更内容に応じた追加確認を行う。
+
+変更が小さい場合でも、関連する標準シナリオは省略しない。
+一方で、変更と関係しない標準シナリオまで毎回すべて実行する必要はない。
 
 特に以下を確認する。
 
@@ -125,6 +137,11 @@ Invoke-RestMethod http://127.0.0.1:9335/json/version
 - 変更した処理の前後で維持すべき既存挙動
 
 確認しない場合は、理由を結果に残す。
+
+例:
+
+- alert文言の組み立てだけを変更した場合は、成功系を1ケース確認し、エラー分岐は対象API応答を差し替えて確認する
+- 日付入力そのものを変更していない場合は、`type="date"` を日付UIとして操作することにこだわらず、`YYYY-MM-DD` 文字列がrequest bodyに入ることを確認する
 
 ## Check Points
 
