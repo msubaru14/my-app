@@ -1,12 +1,12 @@
 import "../../../components/common.css"
 import "./TaskList.css"
-import { LogOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../types/task";
 import { getMe } from "../../auth/api/authApi";
 import { fetchTasks, toggleTaskComplete, deleteTask } from "../api/tasksApi";
 import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
+import { TaskListHeader } from "./TaskListHeader";
 import { TaskListItem } from "./TaskListItem";
 import { Navigate, useNavigate } from "react-router-dom"
 import { useApiError } from "../../../hooks/useApiError";
@@ -112,30 +112,19 @@ export const TaskList = () => {
     setIsOpen(true)
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    window.location.href = "/login";
+  }
+
   if (!token) {
     return <Navigate to="/login" />;
   }
 
   return (
     <div className="task-wrapper">
-      <div className="header">
-        <div className="header-top">
-          <h1>今日のタスク</h1>
-          <button 
-            className="button-with-icon logout"
-            onClick={() => {
-              localStorage.removeItem("token");
-              setUser(null);
-              window.location.href = "/login";
-            }}
-          >
-            <LogOut size={14} />
-            ログアウト
-          </button>
-        </div>
-        
-        <p className="greeting">こんにちは、{user?.name}さん</p>
-      </div>
+      <TaskListHeader user={user} onLogout={handleLogout} />
 
       <div className="task-container">
         <div className="task-list">
