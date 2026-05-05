@@ -53,9 +53,9 @@ export const useTaskListData = () => {
     setUser(null);
   };
 
-  const toggleTask = async (id: number, current: boolean) => {
+  const toggleCompletion = async (task: Task) => {
     try {
-      await toggleTaskComplete(id, current);
+      await toggleTaskComplete(task.id, task.completed);
       await loadTasks();
     } catch (err) {
       const result = resolveError(err);
@@ -74,9 +74,9 @@ export const useTaskListData = () => {
     }
   };
 
-  const deleteTaskById = async (id: number) => {
+  const removeTask = async (task: Task) => {
     try {
-      await deleteTask(id);
+      await deleteTask(task.id);
       await loadTasks();
     } catch (err) {
       const result = resolveError(err);
@@ -100,7 +100,7 @@ export const useTaskListData = () => {
     tasks,
     loadTasks,
     clearUser,
-    toggleTask,
-    deleteTaskById,
+    toggleCompletion,
+    removeTask,
   };
 };
