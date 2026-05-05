@@ -19,18 +19,18 @@ export const TaskList = () => {
     tasks,
     loadTasks,
     clearUser,
-    toggleTask,
-    deleteTaskById,
+    toggleCompletion,
+    removeTask,
   } = useTaskListData();
 
   const token = localStorage.getItem("token");
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (task: Task) => {
     const confirmed = window.confirm("このタスクを削除しますか？");
 
     if (!confirmed) return;
 
-    await deleteTaskById(id);
+    await removeTask(task);
   }
 
   const todayTasks = filterTodayTasks(tasks);
@@ -60,7 +60,7 @@ export const TaskList = () => {
             <TaskListItem
               key={task.id}
               task={task}
-              onToggle={toggleTask}
+              onToggle={toggleCompletion}
               onEdit={openModal}
               onDelete={handleDelete}
             />

@@ -3,9 +3,9 @@ import type { Task } from "../types/task";
 
 type Props = {
   task: Task;
-  onToggle: (id: number, current: boolean) => void;
+  onToggle: (task: Task) => void;
   onEdit: (task: Task) => void;
-  onDelete: (id: number) => void;
+  onDelete: (task: Task) => void;
 };
 
 export const TaskListItem = ({
@@ -20,7 +20,7 @@ export const TaskListItem = ({
         <input
           type="checkbox"
           checked={task.completed}
-          onChange={() => onToggle(task.id, task.completed)}
+          onChange={() => onToggle(task)}
         />
 
         <span className="task-title" title={task.title}>
@@ -33,7 +33,7 @@ export const TaskListItem = ({
           <Pencil size={16} />
           編集
         </button>
-        <button className="button-with-icon delete" onClick={() => onDelete(task.id)}>
+        <button className="button-with-icon delete" onClick={() => onDelete(task)}>
           <Trash2 size={16} />
           削除
         </button>
