@@ -185,9 +185,14 @@ If any uncertainty exists:
 
 ## ■ Error Handling Rules
 
-* Follow existing pattern
-* Do not change UI behavior
-* Do not modify messages or alerts
+* Frontend error control must be based on `result.type` returned from `useApiError`
+* Do not branch by message text
+* API `error.code` must be used for control logic
+* API `error.message` may be used only as a display message candidate
+* Validation errors should use `details[].message` or normalized `result.message`
+* Minimal behavior changes are allowed to unify error handling and display
+* Avoid unrelated UI changes while updating error handling
+* Refer to `docs/frontend-error-handling.md` for the detailed policy
 
 ---
 
