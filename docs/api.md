@@ -10,7 +10,8 @@ http://localhost:8080
 
 本APIでは、全てのレスポンスを以下の形式で統一する。  
 フロントエンドは error.code を用いて分岐制御を行うこと  
-message には依存しない
+message には依存しない  
+詳細なフロントエンド側のエラー処理方針は [フロントエンド エラー処理方針](./frontend-error-handling.md) を参照。
 
 ### 成功時
 ```json
