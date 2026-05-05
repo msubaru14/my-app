@@ -13,12 +13,17 @@ type Props = {
 export const TaskAdd = ({ onTaskAdded }: Props) => {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const { resolveError } = useApiError();
   const navigate = useNavigate();
 
   const handleTaskAdd = async () => {
+    setError("");
+    setFieldErrors([]);
+
     if (!title.trim()) {
-      alert("タスク名を入力してください");
+      setFieldErrors(["タスク名を入力してください"]);
       return
     }
 
@@ -28,6 +33,8 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
 
       setTitle("");
       setDueDate("");
+      setError("");
+      setFieldErrors([]);
 
       onTaskAdded();
     } catch (err) {
@@ -39,17 +46,18 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
           break;
 
         case "validation": {
-          const message =
+          const messages =
             result.details.length > 0
-              ? result.details.map((detail) => detail.message).join("\n")
-              : result.message;
+              ? result.details.map((detail) => detail.message)
+              : [result.message];
 
-          alert(message);
+          setFieldErrors(messages);
+          setError("");
           break;
         }
 
         case "message":
-          alert(result.message);
+          setError(result.message);
           break;
       }
     }
@@ -76,6 +84,16 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
       <button className="add-button" onClick={handleTaskAdd}>
         追加
       </button>
+
+      {fieldErrors.length > 0 && (
+        <ul style={{ color: "#d33", margin: "8px 0", paddingLeft: "20px" }}>
+          {fieldErrors.map((message, index) => (
+            <li key={`${message}-${index}`}>{message}</li>
+          ))}
+        </ul>
+      )}
+
+      {error && <p style={{ color: "#d33", margin: "8px 0" }}>{error}</p>}
     </div>
   );
 };
