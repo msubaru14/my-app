@@ -1,9 +1,8 @@
 import "../../../components/common.css"
 import "./TaskList.css"
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import type { Task } from "../types/task";
-import { getMe } from "../../auth/api/authApi";
-import { fetchTasks, toggleTaskComplete, deleteTask } from "../api/tasksApi";
+import { toggleTaskComplete, deleteTask } from "../api/tasksApi";
 import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
 import { TaskListHeader } from "./TaskListHeader";
@@ -11,53 +10,22 @@ import { TaskListItem } from "./TaskListItem";
 import { Navigate, useNavigate } from "react-router-dom"
 import { useApiError } from "../../../hooks/useApiError";
 import { filterTodayTasks } from "../utils/taskFilters";
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
+import { useTaskListData } from "../hooks/useTaskListData";
 
 // 今日のタスク一覧
 export const TaskList = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [isOpen, setIsOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [user, setUser] = useState<User | null>(null);
   const { resolveError } = useApiError();
   const navigate = useNavigate();
+  const {
+    user,
+    tasks,
+    loadTasks,
+    clearUser,
+  } = useTaskListData();
 
   const token = localStorage.getItem("token");
-
-  const loadTasks = useCallback(async () => {
-    if (!token) return;
-
-    try {
-      const me = await getMe();
-      setUser(me);
-
-      const tasks = await fetchTasks();
-      setTasks(tasks);
-    } catch (err) {
-      const result = resolveError(err);
-
-      switch (result.type) {
-        case "redirect":
-          navigate(result.to);
-          break;
-        case "message":
-          console.error(result.message);
-          break;
-        case "validation":
-          console.error(result.message);
-          break;
-      }
-    }
-  }, [navigate, resolveError, token]);
-
-  useEffect(() => {
-    void Promise.resolve().then(loadTasks);
-  }, [loadTasks]);
 
   const handleToggle = async (id: number, current: boolean) => {
     try {
@@ -114,7 +82,7 @@ export const TaskList = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setUser(null);
+    clearUser();
     window.location.href = "/login";
   }
 
