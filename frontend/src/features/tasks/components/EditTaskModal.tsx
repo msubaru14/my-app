@@ -13,28 +13,18 @@ type Props = {
   onUpdated: () => void
 }
 
+type ModalContentProps = {
+  onClose: () => void
+  task: Task
+  onUpdated: () => void
+}
+
 export default function EditTaskModal({
   isOpen,
   onClose,
   task,
   onUpdated,
 }: Props) {
-  const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState<string | null>(null);
-  const [completed, setCompleted] = useState(false);
-  const { resolveError } = useApiError();
-  const navigate = useNavigate();
-
-  // 初期値セット
-  useEffect(() => {
-    if (isOpen && task) {
-      setTitle(task.title);
-      setDueDate(task.dueDate);
-      setCompleted(task.completed);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task])
-
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -51,7 +41,33 @@ export default function EditTaskModal({
 
   if (!isOpen || !task) return null
 
+  return (
+    <EditTaskModalContent
+      key={task.id}
+      onClose={onClose}
+      task={task}
+      onUpdated={onUpdated}
+    />
+  )
+}
+
+function EditTaskModalContent({
+  onClose,
+  task,
+  onUpdated,
+}: ModalContentProps) {
+  const [title, setTitle] = useState(task.title);
+  const [dueDate, setDueDate] = useState<string | null>(task.dueDate);
+  const [completed, setCompleted] = useState(task.completed);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<string[]>([]);
+  const { resolveError } = useApiError();
+  const navigate = useNavigate();
+
   const handleSave = async () => {
+    setError("");
+    setFieldErrors([]);
+
     const payload: Task = {
       id: task.id,
       title,
@@ -72,10 +88,19 @@ export default function EditTaskModal({
           navigate(result.to);
           break;
 
-        case "validation":
+        case "validation": {
+          const messages =
+            result.details.length > 0
+              ? result.details.map((detail) => detail.message)
+              : [result.message];
+
+          setFieldErrors(messages);
+          setError("");
           break;
+        }
 
         case "message":
+          setError(result.message);
           break;
       }
     }
@@ -116,6 +141,16 @@ export default function EditTaskModal({
             <span>完了</span>
           </div>
         </div>
+
+        {fieldErrors.length > 0 && (
+          <ul style={{ color: "#d33", margin: "8px 0", paddingLeft: "20px" }}>
+            {fieldErrors.map((message, index) => (
+              <li key={`${message}-${index}`}>{message}</li>
+            ))}
+          </ul>
+        )}
+
+        {error && <p style={{ color: "#d33", margin: "8px 0" }}>{error}</p>}
 
         <div className="modal-actions">
           <button className="cancel" onClick={onClose}>
