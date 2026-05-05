@@ -72,10 +72,16 @@ export const TaskList = () => {
     } catch (err) {
       const result = resolveError(err);
 
-      if (result.type === "redirect") {
-        navigate(result.to);
-      } else {
-        console.error(result);
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+        case "validation":
+          alert(result.message);
+          break;
+        case "message":
+          alert(result.message);
+          break;
       }
     }
   };
@@ -91,12 +97,17 @@ export const TaskList = () => {
     } catch (err) {
       const result = resolveError(err);
 
-      if (result.type === "redirect") {
-        navigate(result.to);
-        return;
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+        case "validation":
+          alert(result.message);
+          break;
+        case "message":
+          alert(result.message);
+          break;
       }
-
-      alert("削除に失敗しました");
     }
   }
 
