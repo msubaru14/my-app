@@ -6,14 +6,16 @@ import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
 import { TaskListHeader } from "./TaskListHeader";
 import { TaskListItem } from "./TaskListItem";
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 import { filterTodayTasks } from "../utils/taskFilters";
 import { useTaskListData } from "../hooks/useTaskListData";
+import type { ApiErrorResult } from "../../../hooks/useApiError";
 
 // 今日のタスク一覧
 export const TaskList = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const navigate = useNavigate();
   const {
     user,
     tasks,
@@ -25,12 +27,38 @@ export const TaskList = () => {
 
   const token = localStorage.getItem("token");
 
+  const handleTaskActionError = (error: ApiErrorResult) => {
+    switch (error.type) {
+      case "redirect":
+        navigate(error.to);
+        break;
+      case "validation":
+        alert(error.message);
+        break;
+      case "message":
+        alert(error.message);
+        break;
+    }
+  };
+
+  const handleToggle = async (task: Task) => {
+    const result = await toggleCompletion(task);
+
+    if (!result.ok) {
+      handleTaskActionError(result.error);
+    }
+  };
+
   const handleDelete = async (task: Task) => {
     const confirmed = window.confirm("このタスクを削除しますか？");
 
     if (!confirmed) return;
 
-    await removeTask(task);
+    const result = await removeTask(task);
+
+    if (!result.ok) {
+      handleTaskActionError(result.error);
+    }
   }
 
   const todayTasks = filterTodayTasks(tasks);
@@ -60,7 +88,7 @@ export const TaskList = () => {
             <TaskListItem
               key={task.id}
               task={task}
-              onToggle={toggleCompletion}
+              onToggle={handleToggle}
               onEdit={openModal}
               onDelete={handleDelete}
             />
