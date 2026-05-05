@@ -55,7 +55,7 @@ export const TaskList = () => {
           console.error(result.message);
           break;
         case "validation":
-          console.error(result.details);
+          console.error(result.message);
           break;
       }
     }
