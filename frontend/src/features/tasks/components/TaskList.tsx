@@ -1,12 +1,13 @@
 import "../../../components/common.css"
 import "./TaskList.css"
-import { Pencil, Trash2, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Task } from "../types/task";
 import { getMe } from "../../auth/api/authApi";
 import { fetchTasks, toggleTaskComplete, deleteTask } from "../api/tasksApi";
 import { TaskAdd } from "./TaskAdd";
 import EditTaskModal from "./EditTaskModal"
+import { TaskListItem } from "./TaskListItem";
 import { Navigate, useNavigate } from "react-router-dom"
 import { useApiError } from "../../../hooks/useApiError";
 import { filterTodayTasks } from "../utils/taskFilters";
@@ -139,30 +140,13 @@ export const TaskList = () => {
       <div className="task-container">
         <div className="task-list">
           {todayTasks.map((task) => (
-            <div key={task.id} className="task-row">
-              <div className="task-left">
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => handleToggle(task.id, task.completed)}
-                />
-
-                <span className="task-title" title={task.title}>
-                  {task.title}
-                </span>
-              </div>
-
-              <div className="task-actions">
-                <button className="button-with-icon" onClick={() => openModal(task)}>
-                  <Pencil size={16} />
-                  編集
-                </button>
-                <button className="button-with-icon delete" onClick={() => handleDelete(task.id)}>
-                  <Trash2 size={16} />
-                  削除
-                </button>
-              </div>
-            </div>
+            <TaskListItem
+              key={task.id}
+              task={task}
+              onToggle={handleToggle}
+              onEdit={openModal}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
 
