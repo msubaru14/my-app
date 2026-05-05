@@ -19,13 +19,10 @@ export const useTaskListData = () => {
 
   const token = localStorage.getItem("token");
 
-  const loadTasks = useCallback(async () => {
+  const reloadTasks = useCallback(async () => {
     if (!token) return;
 
     try {
-      const me = await getMe();
-      setUser(me);
-
       const tasks = await fetchTasks();
       setTasks(tasks);
     } catch (err) {
@@ -45,9 +42,34 @@ export const useTaskListData = () => {
     }
   }, [navigate, resolveError, token]);
 
+  const loadInitialData = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const me = await getMe();
+      setUser(me);
+
+      await reloadTasks();
+    } catch (err) {
+      const result = resolveError(err);
+
+      switch (result.type) {
+        case "redirect":
+          navigate(result.to);
+          break;
+        case "message":
+          console.error(result.message);
+          break;
+        case "validation":
+          console.error(result.message);
+          break;
+      }
+    }
+  }, [navigate, reloadTasks, resolveError, token]);
+
   useEffect(() => {
-    void Promise.resolve().then(loadTasks);
-  }, [loadTasks]);
+    void Promise.resolve().then(loadInitialData);
+  }, [loadInitialData]);
 
   const clearUser = () => {
     setUser(null);
@@ -56,7 +78,7 @@ export const useTaskListData = () => {
   const toggleCompletion = async (task: Task) => {
     try {
       await toggleTaskComplete(task.id, task.completed);
-      await loadTasks();
+      await reloadTasks();
     } catch (err) {
       const result = resolveError(err);
 
@@ -77,7 +99,7 @@ export const useTaskListData = () => {
   const removeTask = async (task: Task) => {
     try {
       await deleteTask(task.id);
-      await loadTasks();
+      await reloadTasks();
     } catch (err) {
       const result = resolveError(err);
 
@@ -98,7 +120,7 @@ export const useTaskListData = () => {
   return {
     user,
     tasks,
-    loadTasks,
+    reloadTasks,
     clearUser,
     toggleCompletion,
     removeTask,

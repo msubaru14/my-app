@@ -17,7 +17,7 @@ export const TaskList = () => {
   const {
     user,
     tasks,
-    loadTasks,
+    reloadTasks,
     clearUser,
     toggleCompletion,
     removeTask,
@@ -67,13 +67,13 @@ export const TaskList = () => {
           ))}
         </div>
 
-        <TaskAdd onTaskAdded={loadTasks} />
+        <TaskAdd onTaskAdded={reloadTasks} />
 
         <EditTaskModal
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           task={selectedTask}
-          onUpdated={loadTasks}
+          onUpdated={reloadTasks}
         />
       </div>
     </div>
