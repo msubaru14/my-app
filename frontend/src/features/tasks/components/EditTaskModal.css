@@ -25,23 +25,27 @@
   margin-bottom: 20px;
 }
 
-.form-group {
+.edit-task-modal-form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
   text-align: left;
 }
 
-.form-group label {
+.edit-task-modal-form-group label {
   margin-bottom: 6px;
 }
 
-.input {
+.edit-task-modal-input {
+  width: 100%;
   background: #2a2a2a;
   border: 1px solid #444;
   border-radius: 6px;
   padding: 8px;
+  box-sizing: border-box;
   color: #fff;
+  font-size: 18px;
+  margin-bottom: 12px;
 }
 
 .checkbox-group {
@@ -78,4 +82,3 @@
   padding: 8px 12px;
   border-radius: 6px;
 }
-
