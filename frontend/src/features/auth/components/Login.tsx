@@ -68,14 +68,14 @@ export const Login = () => {
       <FormField label="パスワード" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
       {fieldErrors.length > 0 && (
-        <ul style={{ color: "#d33", margin: "8px 0", paddingLeft: "20px" }}>
+        <ul className="error-list">
           {fieldErrors.map((message, index) => (
             <li key={`${message}-${index}`}>{message}</li>
           ))}
         </ul>
       )}
 
-      {error && <p style={{ color: "#d33", margin: "8px 0" }}>{error}</p>}
+      {error && <p className="error-message">{error}</p>}
 
       <button className="auth-button" onClick={handleLogin} disabled={loading}>
         {loading ? "ログイン中..." : "ログイン"}

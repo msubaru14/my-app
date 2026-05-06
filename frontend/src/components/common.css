@@ -10,3 +10,13 @@ button {
   cursor: pointer;
 }
 
+.error-list {
+  color: #d33;
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.error-message {
+  color: #d33;
+  margin: 8px 0;
+}
