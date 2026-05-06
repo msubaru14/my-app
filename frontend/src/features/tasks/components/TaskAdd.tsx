@@ -65,7 +65,7 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
 
   return (
     <div className="task-add">
-      <h3 style={{marginTop: 0}}>タスク追加</h3>
+      <h3 className="task-add-title">タスク追加</h3>
 
       <input
         className="task-input"

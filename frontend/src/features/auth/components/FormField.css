@@ -20,7 +20,7 @@
   font-size: 18px;
 }
 
-input:focus {
+.auth-form-input:focus {
   outline: none;
   border: 1px solid #b1b1b1;
 }
