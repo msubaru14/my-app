@@ -68,14 +68,14 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
       <h3 style={{marginTop: 0}}>タスク追加</h3>
 
       <input
-        className="input"
+        className="task-input"
         placeholder="タスク名を入力してください"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
 
       <input
-        className="input"
+        className="task-input"
         type="date"
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}

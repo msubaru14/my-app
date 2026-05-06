@@ -111,19 +111,19 @@ function EditTaskModalContent({
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title">タスク編集</h2>
 
-        <div className="form-group">
+        <div className="edit-task-modal-form-group">
           <label>タイトル</label>
           <input
-            className="input"
+            className="edit-task-modal-input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
-        <div className="form-group">
+        <div className="edit-task-modal-form-group">
           <label>期限</label>
           <input
-            className="input"
+            className="edit-task-modal-input"
             type="date"
             value={dueDate ?? ""}
             onChange={(e) => setDueDate(e.target.value || null)}
