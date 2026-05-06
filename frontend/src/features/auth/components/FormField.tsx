@@ -14,10 +14,10 @@ export const FormField = ({
   onChange
 }: Props) => {
   return (
-    <div className="form-group">
-      <label className="form-label">{label}</label>
+    <div className="auth-form-group">
+      <label className="auth-form-label">{label}</label>
       <input
-        className="form-input"
+        className="auth-form-input"
         type={type}
         value={value}
         onChange={onChange}
