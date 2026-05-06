@@ -172,6 +172,34 @@ If any uncertainty exists:
 
 ---
 
+## ■ Understanding Verification
+
+Codex may perform understanding checks to prevent work from becoming a black box for the Commander.
+
+This is an operational rule, not an implementation rule.
+The purpose is not to test or pressure the Commander, but to keep the Commander able to explain the purpose, scope, and impact of changes.
+
+Understanding checks should be performed when risk is high, such as:
+
+* Changes affect authentication, authorization, error handling, or shared code
+* Changes span multiple layers or features
+* A design decision affects future refactoring direction
+* Before creating a PR for changes with non-trivial impact
+
+For low-risk or routine changes, understanding checks do not need to be performed every time.
+Codex may perform them occasionally or randomly at natural stopping points to avoid excessive process overhead.
+
+When performing an understanding check, Codex should briefly confirm:
+
+* What changed
+* Why it changed
+* What behavior should remain unchanged
+* What risks or review points exist
+
+If the Commander has unclear points, Codex should explain before proceeding.
+
+---
+
 ## ■ File Movement Rules
 
 * Move only specified files
