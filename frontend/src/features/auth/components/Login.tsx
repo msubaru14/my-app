@@ -83,5 +83,3 @@ export const Login = () => {
     </AuthCard>
   );
 }
-
-export default Login;
