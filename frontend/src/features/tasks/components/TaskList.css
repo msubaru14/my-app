@@ -49,7 +49,7 @@
   text-align: left;
 }
 
-.task-left input {
+.task-checkbox {
   transform: translateY(1px);
 }
 
@@ -78,7 +78,8 @@
   border-radius: 8px;
 }
 
-.task-add h3 {
+.task-add-title {
+  margin-top: 0;
   margin-bottom: 12px;
 }
 
@@ -109,7 +110,7 @@
   margin-bottom: 16px;
 }
 
-.header h1 {
+.task-list-title {
   font-size: 24px;
   font-weight: bold;
   margin: 0;

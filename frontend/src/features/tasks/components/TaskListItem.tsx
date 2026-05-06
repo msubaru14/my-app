@@ -18,6 +18,7 @@ export const TaskListItem = ({
     <div className="task-row">
       <div className="task-left">
         <input
+          className="task-checkbox"
           type="checkbox"
           checked={task.completed}
           onChange={() => onToggle(task)}

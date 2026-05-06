@@ -112,7 +112,7 @@ function EditTaskModalContent({
         <h2 className="modal-title">タスク編集</h2>
 
         <div className="edit-task-modal-form-group">
-          <label>タイトル</label>
+          <label className="edit-task-modal-label">タイトル</label>
           <input
             className="edit-task-modal-input"
             value={title}
@@ -121,7 +121,7 @@ function EditTaskModalContent({
         </div>
 
         <div className="edit-task-modal-form-group">
-          <label>期限</label>
+          <label className="edit-task-modal-label">期限</label>
           <input
             className="edit-task-modal-input"
             type="date"

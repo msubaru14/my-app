@@ -18,7 +18,7 @@ export const TaskListHeader = ({
   return (
     <div className="header">
       <div className="header-top">
-        <h1>今日のタスク</h1>
+        <h1 className="task-list-title">今日のタスク</h1>
         <button
           className="button-with-icon logout"
           onClick={onLogout}
