@@ -4,12 +4,17 @@ import { getMe } from "../../auth/api/authApi";
 import { deleteTask, fetchTasks, toggleTaskComplete } from "../api/tasksApi";
 import type { Task } from "../types/task";
 import { useApiError } from "../../../hooks/useApiError";
+import type { ApiErrorResult } from "../../../hooks/useApiError";
 
 type User = {
   id: number;
   name: string;
   email: string;
 };
+
+type TaskActionResult =
+  | { ok: true }
+  | { ok: false; error: ApiErrorResult };
 
 export const useTaskListData = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -75,45 +80,27 @@ export const useTaskListData = () => {
     setUser(null);
   };
 
-  const toggleCompletion = async (task: Task) => {
+  const toggleCompletion = async (task: Task): Promise<TaskActionResult> => {
     try {
       await toggleTaskComplete(task.id, task.completed);
       await reloadTasks();
+      return { ok: true };
     } catch (err) {
       const result = resolveError(err);
 
-      switch (result.type) {
-        case "redirect":
-          navigate(result.to);
-          break;
-        case "validation":
-          alert(result.message);
-          break;
-        case "message":
-          alert(result.message);
-          break;
-      }
+      return { ok: false, error: result };
     }
   };
 
-  const removeTask = async (task: Task) => {
+  const removeTask = async (task: Task): Promise<TaskActionResult> => {
     try {
       await deleteTask(task.id);
       await reloadTasks();
+      return { ok: true };
     } catch (err) {
       const result = resolveError(err);
 
-      switch (result.type) {
-        case "redirect":
-          navigate(result.to);
-          break;
-        case "validation":
-          alert(result.message);
-          break;
-        case "message":
-          alert(result.message);
-          break;
-      }
+      return { ok: false, error: result };
     }
   }
 
