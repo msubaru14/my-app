@@ -1,4 +1,3 @@
-import "../../../components/common.css"
 import "./TaskList.css"
 import { useState } from "react";
 import type { Task } from "../types/task";
