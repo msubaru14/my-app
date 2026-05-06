@@ -2,7 +2,7 @@ import "./TaskList.css"
 import { useState } from "react";
 import type { Task } from "../types/task";
 import { TaskAdd } from "./TaskAdd";
-import EditTaskModal from "./EditTaskModal"
+import { EditTaskModal } from "./EditTaskModal"
 import { TaskListHeader } from "./TaskListHeader";
 import { TaskListItem } from "./TaskListItem";
 import { Navigate, useNavigate } from "react-router-dom"

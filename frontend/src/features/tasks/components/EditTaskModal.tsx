@@ -19,7 +19,7 @@ type ModalContentProps = {
   onUpdated: () => void
 }
 
-export default function EditTaskModal({
+export function EditTaskModal({
   isOpen,
   onClose,
   task,
