@@ -1,3 +1,4 @@
+/* Global element styles shared by auth and tasks screens. */
 h2, h3 {
   color: #f3f4f6;
 }
@@ -10,6 +11,7 @@ button {
   cursor: pointer;
 }
 
+/* Shared error display styles used by form-level validation messages. */
 .error-list {
   color: #d33;
   margin: 8px 0;
