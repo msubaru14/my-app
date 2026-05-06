@@ -143,14 +143,14 @@ function EditTaskModalContent({
         </div>
 
         {fieldErrors.length > 0 && (
-          <ul style={{ color: "#d33", margin: "8px 0", paddingLeft: "20px" }}>
+          <ul className="error-list">
             {fieldErrors.map((message, index) => (
               <li key={`${message}-${index}`}>{message}</li>
             ))}
           </ul>
         )}
 
-        {error && <p style={{ color: "#d33", margin: "8px 0" }}>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
 
         <div className="modal-actions">
           <button className="cancel" onClick={onClose}>
