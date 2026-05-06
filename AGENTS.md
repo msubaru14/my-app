@@ -82,6 +82,17 @@ Current phase:
 * Shared code must stay in common directories
 * Do not move files across layers unless instructed
 
+### Frontend Feature Dependency Rules
+
+* Feature public entry points must be `frontend/src/features/{feature}/index.ts`
+* Code outside a feature should import that feature through `features/{feature}`
+* Code outside a feature should not import directly from that feature's internal directories such as `components`, `hooks`, `api`, or `types`
+* Code inside the same feature may use relative imports to its own internal directories
+* Cross-feature dependencies should be kept minimal and explicit
+* Dependencies on `auth` from business features such as `tasks` are allowed when using authentication as shared application infrastructure
+* Reverse dependencies from `auth` to business features such as `tasks` are prohibited
+* Do not expose additional feature internals from `index.ts` unless the task explicitly requires it
+
 ---
 
 ## ■ Core Principles
