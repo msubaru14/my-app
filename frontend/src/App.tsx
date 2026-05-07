@@ -1,7 +1,7 @@
-import "./App.css"
-import { Routes, Route, Navigate } from "react-router-dom"
-import { Login, Register } from "./features/auth"
-import { TaskList } from "./features/tasks"
+import "./App.css";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Login, Register } from "./features/auth";
+import { TaskList } from "./features/tasks";
 
 
 export const App = () => {
@@ -16,5 +16,5 @@ export const App = () => {
         </Routes>
       </div>
     </div>
-  )
-}
+  );
+};

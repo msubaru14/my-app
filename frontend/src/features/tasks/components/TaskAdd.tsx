@@ -1,5 +1,5 @@
-import "../../../components/common.css"
-import "./TaskList.css"
+import "../../../components/common.css";
+import "./TaskList.css";
 import { useState } from "react";
 import { createTask } from "../api/tasksApi";
 import { useApiError } from "../../../hooks/useApiError";
@@ -24,7 +24,7 @@ export const TaskAdd = ({ onTaskAdded }: Props) => {
 
     if (!title.trim()) {
       setFieldErrors(["タスク名を入力してください"]);
-      return
+      return;
     }
 
     // タスク追加API

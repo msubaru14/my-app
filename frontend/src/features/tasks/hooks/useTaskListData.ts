@@ -13,8 +13,8 @@ type User = {
 };
 
 type TaskActionResult =
-  | { ok: true }
-  | { ok: false; error: ApiErrorResult };
+  | { ok: true; }
+  | { ok: false; error: ApiErrorResult; };
 
 export const useTaskListData = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -102,7 +102,7 @@ export const useTaskListData = () => {
 
       return { ok: false, error: result };
     }
-  }
+  };
 
   return {
     user,

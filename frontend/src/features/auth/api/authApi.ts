@@ -48,4 +48,4 @@ export const getMe = async () => {
   });
 
   return json.data.user;
-}
+};

@@ -1,11 +1,11 @@
-import "./FormField.css"
+import "./FormField.css";
 
 type Props = {
-  label: string
-  type?: string
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-}
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
 
 export const FormField = ({
   label,
@@ -23,5 +23,5 @@ export const FormField = ({
         onChange={onChange}
       />
     </div>
-  )
-}
+  );
+};

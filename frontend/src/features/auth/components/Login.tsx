@@ -1,7 +1,7 @@
-import "../../../components/common.css"
+import "../../../components/common.css";
 import { useState } from "react";
 import { useApiError } from "../../../hooks/useApiError";
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 import { AuthCard } from "./AuthCard";
 import { FormField } from "./FormField";
 import { login } from "../api/authApi";
@@ -12,7 +12,7 @@ export const Login = () => {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { resolveError } = useApiError();
 
   const handleLogin = async () => {
@@ -24,7 +24,7 @@ export const Login = () => {
       const data = await login(email, password);
 
       localStorage.setItem("token", data.token);
-      navigate("/tasks")
+      navigate("/tasks");
 
     } catch(err) {
       const result = resolveError(err);
@@ -82,4 +82,4 @@ export const Login = () => {
       </button>
     </AuthCard>
   );
-}
+};
