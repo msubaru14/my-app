@@ -8,7 +8,6 @@ import type { Task } from "../types/task";
 
 // GET /tasks
 export const fetchTasks = async () => {
-  console.log('fetch tasks');
   const json = await requestJson(`${API_BASE_URL}/tasks`, {
     headers: getAuthHeaders(),
   });

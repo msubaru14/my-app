@@ -11,7 +11,6 @@ export const createUser = async (
   email: string,
   password: string
 ) => {
-  console.log('create user');
   const json = await requestJson(`${API_BASE_URL}/users`, {
     method: "POST",
     headers: getJsonHeaders(),
@@ -44,7 +43,6 @@ export const login = async (
 
 // GET /me
 export const getMe = async () => {
-  console.log('get me');
   const json = await requestJson(`${API_BASE_URL}/me`, {
     headers: getAuthHeaders(),
   });
