@@ -25,7 +25,10 @@ This is a task management application.
 
 Current phase:
 
-* Refactoring and structure improvement (NOT feature development)
+* Backend refactoring and structure improvement (NOT feature development)
+* Backend refactoring progress and priorities are managed through Issues and `docs/backend_refactoring_plan.md`
+* Before starting backend refactoring tasks, check the relevant Issue and `docs/backend_refactoring_plan.md`
+* Frontend refactoring phase is completed; existing frontend rules remain as maintenance constraints
 
 ---
 
