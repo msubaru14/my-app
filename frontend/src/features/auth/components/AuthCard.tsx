@@ -1,10 +1,10 @@
-import "./AuthCard.css"
+import "./AuthCard.css";
 
 type Props = {
-  title: string
-  children: React.ReactNode
-  footer: React.ReactNode
-}
+  title: string;
+  children: React.ReactNode;
+  footer: React.ReactNode;
+};
 
 export const AuthCard = ({ title, children, footer }: Props) => {
   return (
@@ -23,5 +23,5 @@ export const AuthCard = ({ title, children, footer }: Props) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

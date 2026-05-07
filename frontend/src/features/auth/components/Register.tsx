@@ -1,34 +1,34 @@
-import "../../../components/common.css"
-import { useState } from "react"
-import { createUser } from "../api/authApi"
-import { useNavigate, Link } from "react-router-dom"
+import "../../../components/common.css";
+import { useState } from "react";
+import { createUser } from "../api/authApi";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthCard } from "./AuthCard";
 import { FormField } from "./FormField";
 import { useApiError } from "../../../hooks/useApiError";
 
 export const Register = () => {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const { resolveError } = useApiError();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     setError("");
     setFieldErrors([]);
 
     // フロントバリデーション（最低限）
-    const newErrors: Record<string, string> = {}
-    if (!name) newErrors.name = "ユーザー名は必須です"
-    if (!email) newErrors.email = "メールアドレスは必須です"
-    if (!password) newErrors.password = "パスワードは必須です"
+    const newErrors: Record<string, string> = {};
+    if (!name) newErrors.name = "ユーザー名は必須です";
+    if (!email) newErrors.email = "メールアドレスは必須です";
+    if (!password) newErrors.password = "パスワードは必須です";
 
     if (Object.keys(newErrors).length > 0) {
       setFieldErrors(Object.values(newErrors));
-      return
+      return;
     }
 
     try {
@@ -58,7 +58,7 @@ export const Register = () => {
           break;
       }
     }
-  }
+  };
 
   return (
     <AuthCard
@@ -88,5 +88,5 @@ export const Register = () => {
         登録
       </button>
     </AuthCard>
-  )
-}
+  );
+};

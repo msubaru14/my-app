@@ -1,19 +1,19 @@
-import "./TaskList.css"
+import "./TaskList.css";
 import { useState } from "react";
 import type { Task } from "../types/task";
 import { TaskAdd } from "./TaskAdd";
-import { EditTaskModal } from "./EditTaskModal"
+import { EditTaskModal } from "./EditTaskModal";
 import { TaskListHeader } from "./TaskListHeader";
 import { TaskListItem } from "./TaskListItem";
-import { Navigate, useNavigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom";
 import { filterTodayTasks } from "../utils/taskFilters";
 import { useTaskListData } from "../hooks/useTaskListData";
 import type { ApiErrorResult } from "../../../hooks/useApiError";
 
 // 今日のタスク一覧
 export const TaskList = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const navigate = useNavigate();
   const {
     user,
@@ -58,20 +58,20 @@ export const TaskList = () => {
     if (!result.ok) {
       handleTaskActionError(result.error);
     }
-  }
+  };
 
   const todayTasks = filterTodayTasks(tasks);
 
   const openModal = (task: Task) => {
-    setSelectedTask(task)
-    setIsOpen(true)
-  }
+    setSelectedTask(task);
+    setIsOpen(true);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     clearUser();
     window.location.href = "/login";
-  }
+  };
 
   if (!token) {
     return <Navigate to="/login" />;

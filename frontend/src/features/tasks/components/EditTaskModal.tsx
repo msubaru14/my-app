@@ -1,23 +1,23 @@
-import "../../../components/common.css"
-import "./EditTaskModal.css"
-import { useEffect, useState } from "react"
-import { updateTask } from "../api/tasksApi"
-import type { Task } from "../types/task"
+import "../../../components/common.css";
+import "./EditTaskModal.css";
+import { useEffect, useState } from "react";
+import { updateTask } from "../api/tasksApi";
+import type { Task } from "../types/task";
 import { useApiError } from "../../../hooks/useApiError";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
-  isOpen: boolean
-  onClose: () => void
-  task: Task | null
-  onUpdated: () => void
-}
+  isOpen: boolean;
+  onClose: () => void;
+  task: Task | null;
+  onUpdated: () => void;
+};
 
 type ModalContentProps = {
-  onClose: () => void
-  task: Task
-  onUpdated: () => void
-}
+  onClose: () => void;
+  task: Task;
+  onUpdated: () => void;
+};
 
 export function EditTaskModal({
   isOpen,
@@ -28,7 +28,7 @@ export function EditTaskModal({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-    }
+    };
 
     if (isOpen) {
       window.addEventListener("keydown", handleEsc);
@@ -36,10 +36,10 @@ export function EditTaskModal({
 
     return () => {
       window.removeEventListener("keydown", handleEsc);
-    }
-  }, [isOpen, onClose])
+    };
+  }, [isOpen, onClose]);
 
-  if (!isOpen || !task) return null
+  if (!isOpen || !task) return null;
 
   return (
     <EditTaskModalContent
@@ -48,7 +48,7 @@ export function EditTaskModal({
       task={task}
       onUpdated={onUpdated}
     />
-  )
+  );
 }
 
 function EditTaskModalContent({
@@ -73,7 +73,7 @@ function EditTaskModalContent({
       title,
       dueDate: dueDate === "" ? null : dueDate,
       completed,
-    }
+    };
 
     try {
       await updateTask(payload);
@@ -104,7 +104,7 @@ function EditTaskModalContent({
           break;
       }
     }
-  }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -162,5 +162,5 @@ function EditTaskModalContent({
         </div>
       </div>
     </div>
-  )
+  );
 }

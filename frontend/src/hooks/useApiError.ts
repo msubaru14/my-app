@@ -7,9 +7,9 @@ import { ApiError } from "../lib/errors";
 import type { ValidationDetail } from "../lib/errors";
 
 export type ApiErrorResult =
-  | { type: "redirect"; to: string }
-  | { type: "validation"; details: ValidationDetail[]; message: string }
-  | { type: "message"; message: string };
+  | { type: "redirect"; to: string; }
+  | { type: "validation"; details: ValidationDetail[]; message: string; }
+  | { type: "message"; message: string; };
 
 const resolveMessage = (error: ApiError) => {
   return ERROR_MESSAGES[error.code] ?? error.message ?? GENERIC_ERROR_MESSAGE;

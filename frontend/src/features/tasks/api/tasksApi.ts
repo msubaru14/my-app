@@ -33,7 +33,7 @@ export const createTask = async (
   });
 
   return json.data.task;
-}
+};
 
 // PATCH /tasks/:id (完了チェック)
 export const toggleTaskComplete = async (
@@ -52,7 +52,7 @@ export const toggleTaskComplete = async (
   });
 
   return json.data.task;
-}
+};
 
 // PATCH /tasks/:id (タスク編集)
 export const updateTask = async (
@@ -72,7 +72,7 @@ export const updateTask = async (
   });
 
   return json.data.task;
-}
+};
 
 // DELETE /tasks/:id
 export const deleteTask = async (id: number) => {
@@ -82,4 +82,4 @@ export const deleteTask = async (id: number) => {
   });
 
   return json;
-}
+};
