@@ -85,6 +85,16 @@ HTTP PATCHの思想に沿い、フロントからの差分更新に柔軟に対�
 - Service: ビジネスロジック
 - Repository: DB操作
 
+### フロントエンド構成
+
+フロントエンドは feature 単位で画面・API・型・補助ロジックをまとめています。
+
+- auth: 認証画面と認証関連API
+- tasks: タスク一覧・編集などのタスク管理機能
+- common: 複数機能で利用する共通UI、hooks、API基盤、型定義
+
+feature 外から利用する要素は `features/{feature}/index.ts` を入口にし、利用側が feature 内部構造に依存しすぎないようにしています。
+
 ## 🗄 DBスキーマ運用ルール
 
 本プロジェクトは、DBスキーマ変更を `backend/db/migrations` に一本化します。
@@ -119,7 +129,7 @@ HTTP PATCHの思想に沿い、フロントからの差分更新に柔軟に対�
 ```
 
 ### 設計意図
-- フロントエンドは `error.code` を用いて分岐
+- フロントエンド側では `error.code` を基準にエラーを分類
 - `message` はユーザー表示用（変更可能）
 - `details` によりフィールド単位のエラーを表現
 
@@ -179,8 +189,19 @@ docker compose up --build -d
 └── frontend
     ├── public
     └── src
-        ├── assets
         ├── components
+        ├── constants
+        ├── features
+        │   ├── auth
+        │   │   ├── api
+        │   │   └── components
+        │   └── tasks
+        │       ├── api
+        │       ├── components
+        │       ├── hooks
+        │       ├── types
+        │       └── utils
+        ├── hooks
         ├── lib
         └── types
 ```
@@ -195,15 +216,17 @@ docker compose up --build -d
 ## 🧠 設計の特徴
 - APIレスポンスを完全に統一
 - エラーを code ベースで管理
-- フロントは code のみを参照して分岐
+- APIエラーを共通処理で分類し、画面側は分類結果を元に表示・遷移を判断
 - details によりバリデーションを柔軟に表現  
+- APIリクエスト処理を `frontend/src/lib/api.ts` に集約
+- APIエラーの分類と表示用メッセージ整形を `useApiError` に集約
+- 認証・タスク管理を feature 単位で分離し、変更範囲を追いやすい構成に整理
+- feature の公開口を `index.ts` にまとめ、利用側から見える依存を簡潔に維持
 👉 実務を意識した設計にしています
 
 
 ## ⚠️ 今後の改善・拡張予定
 - バリデーションロジックのService層への集約
-- APIクライアントの共通化
-- エラーハンドリングのさらなる整理
 - テストコードの追加
 - レスポンシブ対応
 
