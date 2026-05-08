@@ -2,15 +2,10 @@ package service
 
 import (
 	"errors"
-	"fmt"
-	"strings"
-	"time"
-	"unicode/utf8"
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
-	"github.com/msubaru14/my-app-backend/pkg/validation"
 	"github.com/msubaru14/my-app-backend/repository"
 	"gorm.io/gorm"
 )
@@ -31,59 +26,8 @@ func (s *TaskService) GetTasksByUser(userID uint) ([]model.Task, error) {
 
 // タスク更新
 func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest) (*model.Task, error) {
-	if req.Title == nil && req.DueDate == nil && req.Completed == nil {
+	if !hasUpdateTaskFields(req) {
 		return nil, apperror.NewInvalidRequest("no fields to update")
-	}
-
-	details := []apperror.ErrorDetail{}
-
-	// タイトルバリデーション
-	if req.Title != nil {
-		trimmed := strings.TrimSpace(*req.Title)
-		if trimmed == "" {
-			details = append(details, apperror.ErrorDetail{
-				Field:   "title",
-				Code:    apperror.DetailRequired,
-				Message: "タイトルは必須です",
-			})
-		}
-
-		if utf8.RuneCountInString(trimmed) > validation.TaskTitleMaxLength {
-			details = append(details, apperror.ErrorDetail{
-				Field:   "title",
-				Code:    apperror.DetailTooLong,
-				Message: fmt.Sprintf("タイトルは%d文字以内で入力してください", validation.TaskTitleMaxLength),
-			})
-		}
-
-		req.Title = &trimmed
-	}
-
-	// 日付バリデーション
-	if req.DueDate != nil {
-		trimmed := strings.TrimSpace(*req.DueDate)
-
-		if trimmed == "" {
-			details = append(details, apperror.ErrorDetail{
-				Field:   "dueDate",
-				Code:    apperror.DetailInvalidFormat,
-				Message: "日付は空文字不可です",
-			})
-		} else {
-			if _, err := time.Parse("2006-01-02", trimmed); err != nil {
-				details = append(details, apperror.ErrorDetail{
-					Field:   "dueDate",
-					Code:    apperror.DetailInvalidFormat,
-					Message: "日付は YYYY-MM-DD 形式で入力してください",
-				})
-			} else {
-				req.DueDate = &trimmed
-			}
-		}
-	}
-
-	if len(details) > 0 {
-		return nil, apperror.NewValidationError("validation error", details)
 	}
 
 	// 対象タスク取得
@@ -113,6 +57,10 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 	}
 
 	return task, nil
+}
+
+func hasUpdateTaskFields(req dto.UpdateTaskRequest) bool {
+	return req.Title != nil || req.DueDate != nil || req.Completed != nil
 }
 
 // タスク削除
