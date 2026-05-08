@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
@@ -47,7 +48,7 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 			})
 		}
 
-		if len(trimmed) > validation.TaskTitleMaxLength {
+		if utf8.RuneCountInString(trimmed) > validation.TaskTitleMaxLength {
 			details = append(details, apperror.ErrorDetail{
 				Field:   "title",
 				Code:    apperror.DetailTooLong,

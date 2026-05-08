@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 	"github.com/msubaru14/my-app-backend/dto"
@@ -92,7 +93,7 @@ func validateTitle(title string) *apperror.APIError {
 		}
 	}
 
-	if len(title) <= validation.TaskTitleMaxLength {
+	if utf8.RuneCountInString(title) <= validation.TaskTitleMaxLength {
 		return nil
 	}
 
