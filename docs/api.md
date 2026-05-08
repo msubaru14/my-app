@@ -317,6 +317,7 @@ Authorization: Bearer {token}
 }
 ```
 
+※ title: 最大100文字
 ※ dueDate: 任意（未指定または空文字の場合はnullとして扱う）  
 ※ 形式: YYYY-MM-DD
 
@@ -472,6 +473,7 @@ Authorization: Bearer {token}
 - リクエストは少なくとも1つのフィールドが必要
 - title:
   - 空文字・空白のみは禁止
+  - 最大100文字
 - dueDate:
   - YYYY-MM-DD形式
   - 空文字は禁止

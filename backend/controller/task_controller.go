@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
 	"github.com/msubaru14/my-app-backend/pkg/response"
+	"github.com/msubaru14/my-app-backend/pkg/validation"
 	"github.com/msubaru14/my-app-backend/service"
 )
 
@@ -76,7 +78,21 @@ func validateCreateTaskInput(input *dto.CreateTaskInput) *apperror.APIError {
 }
 
 func validateTitle(title string) *apperror.APIError {
-	if title != "" {
+	if title == "" {
+		return &apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: []apperror.ErrorDetail{
+				{
+					Field:   "title",
+					Code:    apperror.DetailRequired,
+					Message: "タイトルは必須です",
+				},
+			},
+		}
+	}
+
+	if len(title) <= validation.TaskTitleMaxLength {
 		return nil
 	}
 
@@ -86,8 +102,8 @@ func validateTitle(title string) *apperror.APIError {
 		Details: []apperror.ErrorDetail{
 			{
 				Field:   "title",
-				Code:    apperror.DetailRequired,
-				Message: "タイトルは必須です",
+				Code:    apperror.DetailTooLong,
+				Message: fmt.Sprintf("タイトルは%d文字以内で入力してください", validation.TaskTitleMaxLength),
 			},
 		},
 	}
