@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"net/mail"
 	"unicode/utf8"
@@ -9,6 +10,7 @@ import (
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
 	"github.com/msubaru14/my-app-backend/pkg/response"
+	"github.com/msubaru14/my-app-backend/pkg/validation"
 	"github.com/msubaru14/my-app-backend/service"
 
 	"github.com/gin-gonic/gin"
@@ -85,11 +87,11 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 			Code:    apperror.DetailRequired,
 			Message: "パスワードは必須です",
 		})
-	} else if utf8.RuneCountInString(input.Password) < 6 {
+	} else if utf8.RuneCountInString(input.Password) < validation.UserPasswordMinLength {
 		details = append(details, apperror.ErrorDetail{
 			Field:   "password",
 			Code:    apperror.DetailTooShort,
-			Message: "パスワードは6文字以上で入力してください",
+			Message: fmt.Sprintf("パスワードは%d文字以上で入力してください", validation.UserPasswordMinLength),
 		})
 	}
 
