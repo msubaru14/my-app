@@ -2,12 +2,15 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
+	"github.com/msubaru14/my-app-backend/pkg/validation"
 	"github.com/msubaru14/my-app-backend/repository"
 	"gorm.io/gorm"
 )
@@ -45,11 +48,11 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 			})
 		}
 
-		if len(trimmed) > 100 {
+		if utf8.RuneCountInString(trimmed) > validation.TaskTitleMaxLength {
 			details = append(details, apperror.ErrorDetail{
 				Field:   "title",
 				Code:    apperror.DetailTooLong,
-				Message: "タイトルが長すぎです",
+				Message: fmt.Sprintf("タイトルは%d文字以内で入力してください", validation.TaskTitleMaxLength),
 			})
 		}
 
