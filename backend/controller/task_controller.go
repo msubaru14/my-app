@@ -29,6 +29,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		response.Error(c, http.StatusBadRequest, apperror.APIError{
 			Code:    apperror.CodeInvalidRequest,
 			Message: "invalid request",
+			Details: nil,
 		})
 		return
 	}
@@ -68,50 +69,47 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 }
 
 func validateCreateTaskInput(input *dto.CreateTaskInput) *apperror.APIError {
-	if err := validateTitle(input.Title); err != nil {
-		return err
-	}
+	details := []apperror.ErrorDetail{}
 
-	if err := validateCreateDueDate(input); err != nil {
-		return err
-	}
+	details = append(details, validateTitle(input.Title)...)
+	details = append(details, validateCreateDueDate(input)...)
 
-	return nil
-}
-
-func validateTitle(title string) *apperror.APIError {
-	if title == "" {
-		return &apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
-			Details: []apperror.ErrorDetail{
-				{
-					Field:   "title",
-					Code:    apperror.DetailRequired,
-					Message: "タイトルは必須です",
-				},
-			},
-		}
-	}
-
-	if utf8.RuneCountInString(title) <= validation.TaskTitleMaxLength {
+	if len(details) == 0 {
 		return nil
 	}
 
 	return &apperror.APIError{
 		Code:    apperror.CodeValidationError,
 		Message: "validation error",
-		Details: []apperror.ErrorDetail{
+		Details: details,
+	}
+}
+
+func validateTitle(title string) []apperror.ErrorDetail {
+	if title == "" {
+		return []apperror.ErrorDetail{
+			{
+				Field:   "title",
+				Code:    apperror.DetailRequired,
+				Message: "タイトルは必須です",
+			},
+		}
+	}
+
+	if utf8.RuneCountInString(title) > validation.TaskTitleMaxLength {
+		return []apperror.ErrorDetail{
 			{
 				Field:   "title",
 				Code:    apperror.DetailTooLong,
 				Message: fmt.Sprintf("タイトルは%d文字以内で入力してください", validation.TaskTitleMaxLength),
 			},
-		},
+		}
 	}
+
+	return nil
 }
 
-func validateCreateDueDate(input *dto.CreateTaskInput) *apperror.APIError {
+func validateCreateDueDate(input *dto.CreateTaskInput) []apperror.ErrorDetail {
 	if input.DueDate == nil {
 		return nil
 	}
@@ -122,15 +120,11 @@ func validateCreateDueDate(input *dto.CreateTaskInput) *apperror.APIError {
 	}
 
 	if _, err := time.Parse("2006-01-02", *input.DueDate); err != nil {
-		return &apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
-			Details: []apperror.ErrorDetail{
-				{
-					Field:   "dueDate",
-					Code:    apperror.DetailInvalidFormat,
-					Message: "日付は YYYY-MM-DD 形式で入力してください",
-				},
+		return []apperror.ErrorDetail{
+			{
+				Field:   "dueDate",
+				Code:    apperror.DetailInvalidFormat,
+				Message: "日付は YYYY-MM-DD 形式で入力してください",
 			},
 		}
 	}
@@ -249,31 +243,7 @@ func validateUpdateTitle(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
 	trimmed := strings.TrimSpace(*input.Title)
 	input.Title = &trimmed
 
-	return validateUpdateTitleValue(trimmed)
-}
-
-func validateUpdateTitleValue(title string) []apperror.ErrorDetail {
-	if title == "" {
-		return []apperror.ErrorDetail{
-			{
-				Field:   "title",
-				Code:    apperror.DetailRequired,
-				Message: "タイトルは必須です",
-			},
-		}
-	}
-
-	if utf8.RuneCountInString(title) > validation.TaskTitleMaxLength {
-		return []apperror.ErrorDetail{
-			{
-				Field:   "title",
-				Code:    apperror.DetailTooLong,
-				Message: fmt.Sprintf("タイトルは%d文字以内で入力してください", validation.TaskTitleMaxLength),
-			},
-		}
-	}
-
-	return nil
+	return validateTitle(trimmed)
 }
 
 func validateUpdateDueDate(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
