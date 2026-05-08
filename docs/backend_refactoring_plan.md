@@ -71,6 +71,81 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - validation はフロントエンドのエラー表示にも影響する
 - `error.code` / `details[].code` / `details[].message` の互換性を維持する
 
+現状の配置：
+
+- `ShouldBindJSON` による JSON request 形式チェックは controller で行っている
+- user登録の DTO には `binding` tag があるが、controller でも必須チェックを手書きしている
+- login DTO / task DTO には `binding` tag がなく、controller または service で validation している
+- task作成の必須チェック・日付形式チェックは controller で行っている
+- task更新の未指定チェック・タイトル長さチェック・日付形式チェックは service で行っている
+- task更新・削除の所有者チェックと not found 判定は service / repository で行っている
+
+endpoint 別の validation 実装箇所：
+
+| endpoint | request形式 | 必須チェック | 形式チェック | 業務ルール / 更新可否 |
+| --- | --- | --- | --- | --- |
+| `POST /login` | controller | controller | なし | 認証失敗は service 経由で unauthorized |
+| `POST /users` | controller / DTO `binding` tag | controller / DTO `binding` tag | DTO `binding` tag に email / min 指定あり。ただし既存返却は controller 手書き必須チェックが中心 | user作成、password hash は service |
+| `POST /tasks` | controller | controller | controller で `dueDate` を `YYYY-MM-DD` チェック | controller で `dueDate` 空文字を `nil` 化、作成処理は service |
+| `PATCH /tasks/:id` | controller | service | service で title長さ、`dueDate` を `YYYY-MM-DD` チェック | service で更新対象フィールド未指定、所有者チェック、not found 判定 |
+| `DELETE /tasks/:id` | controller | なし | なし | service で所有者チェック、not found 判定 |
+
+validation 種別ごとの責務案：
+
+- request形式
+  - controller が担当する
+  - `ShouldBindJSON` 失敗時は既存どおり `INVALID_REQUEST` または現在の endpoint が返している error code を維持する
+- 必須チェック
+  - 原則として controller または DTO validation 近辺で扱う
+  - ただし既存レスポンスの `details[].field` / `details[].code` / `details[].message` を変えない
+  - DTO `binding` tag へ寄せる場合は、既存の日本語メッセージと error detail 形式を維持できるか確認してから扱う
+- 形式チェック
+  - request単体で完結する形式チェックは controller または DTO validation 近辺で扱う
+  - `dueDate` のように create/update で差分があるものは、先に仕様確認Issueで扱う
+- 業務ルール
+  - service が担当する
+  - 例：更新対象フィールドが1つも指定されていない場合の `no fields to update`
+- 更新可否判定
+  - service が担当する
+  - 例：対象taskの存在確認、`user_id` による所有者チェック、not found 判定
+
+推奨方針：
+
+- DTO は JSON request の受け皿とし、項目名・型・最低限の構造を表す責務に留める
+- DTO `binding` tag は、それだけで完結する単純な制約に限定して使う
+  - 例：`required`、`email`、`min`、`max`
+- ただし、`binding` tag を使う場合は、既存の `error.code` / `details[].field` / `details[].code` / `details[].message` 形式へ正規化できることを前提にする
+- controller はリクエスト単体で判定できる入力validationを担当する
+  - 例：JSON形式、必須項目、空文字、単純な形式チェック、path parameter の形式
+- service は DB状態やアプリの業務ルールを伴うvalidationを担当する
+  - 例：存在確認、所有者チェック、重複確認、更新可否、認証照合
+- create/update で扱いが異なる項目や、空文字を `nil` にするような補正を伴う項目は、DTO `binding` tag に寄せる前に仕様を確認する
+- 現時点では、DTOへvalidationを集約するよりも、controller / service の責務を明示して既存挙動を維持する方針を優先する
+
+責務混在箇所：
+
+- user登録は DTO `binding` tag と controller 手書きvalidationが重複している
+- task作成は controller に必須チェック、日付形式チェック、空文字の `nil` 化がまとまっている
+- task更新は service に request値の trim、validation、更新値の補正、業務ルール、更新処理がまとまっている
+- `ShouldBindJSON` 失敗時の error code が endpoint によって `INVALID_REQUEST` と `VALIDATION_ERROR` に分かれている
+
+適用順序：
+
+1. validation の現状仕様を endpoint ごとに一覧化する
+2. `ShouldBindJSON` 失敗時の返却仕様を確認する
+3. user登録の DTO `binding` tag と controller 手書きvalidationの重複扱いを決める
+4. task作成の controller validation を、挙動を変えずに整理できる単位へ分ける
+5. task更新の service validation を、業務ルールと request validation に分けて整理できるか確認する
+6. `dueDate` の create/update 差分を仕様として維持するか、別Issueで判断する
+
+小さく実装する単位：
+
+- endpoint別 validation 仕様表の作成
+- user登録 validation の重複整理
+- task作成 validation の責務整理
+- task更新 validation の責務整理
+- `dueDate` create/update 差分の仕様判断
+
 ---
 
 ### 2. apperror / response 利用方針の統一
