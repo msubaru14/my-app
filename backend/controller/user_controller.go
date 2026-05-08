@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"net/mail"
+	"unicode/utf8"
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
@@ -84,7 +85,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 			Code:    apperror.DetailRequired,
 			Message: "パスワードは必須です",
 		})
-	} else if len(input.Password) < 6 {
+	} else if utf8.RuneCountInString(input.Password) < 6 {
 		details = append(details, apperror.ErrorDetail{
 			Field:   "password",
 			Code:    apperror.DetailTooShort,
