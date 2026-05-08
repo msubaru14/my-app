@@ -85,7 +85,7 @@ endpoint 別の validation 実装箇所：
 | endpoint | request形式 | 必須チェック | 形式チェック | 業務ルール / 更新可否 |
 | --- | --- | --- | --- | --- |
 | `POST /login` | controller | controller | なし | 認証失敗は service 経由で unauthorized |
-| `POST /users` | controller / DTO `binding` tag | controller / DTO `binding` tag | DTO `binding` tag に email / min 指定あり。ただし既存返却は controller 手書き必須チェックが中心 | user作成、password hash は service |
+| `POST /users` | controller / DTO `binding` tag | controller / DTO `binding` tag | DTO `binding` tag と controller 手書きvalidationが併存している。ただし `ShouldBindJSON` が先に実行されるため、binding tag に該当する入力不正は先に `INVALID_REQUEST` として返る。 | user作成、password hash は service |
 | `POST /tasks` | controller | controller | controller で `dueDate` を `YYYY-MM-DD` チェック | controller で `dueDate` 空文字を `nil` 化、作成処理は service |
 | `PATCH /tasks/:id` | controller | service | service で title長さ、`dueDate` を `YYYY-MM-DD` チェック | service で更新対象フィールド未指定、所有者チェック、not found 判定 |
 | `DELETE /tasks/:id` | controller | なし | なし | service で所有者チェック、not found 判定 |
