@@ -29,41 +29,9 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		return
 	}
 
-	if input.Title == "" {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
-			Details: []apperror.ErrorDetail{
-				{
-					Field:   "title",
-					Code:    apperror.DetailRequired,
-					Message: "タイトルは必須です",
-				},
-			},
-		})
+	if apiErr := validateCreateTaskInput(&input); apiErr != nil {
+		response.Error(c, http.StatusBadRequest, *apiErr)
 		return
-	}
-
-	// フォーマット簡易チェック（YYYY-MM-DD）
-	if input.DueDate != nil {
-		if *input.DueDate == "" {
-			input.DueDate = nil
-		} else {
-			if _, err := time.Parse("2006-01-02", *input.DueDate); err != nil {
-				response.Error(c, http.StatusBadRequest, apperror.APIError{
-					Code:    apperror.CodeValidationError,
-					Message: "validation error",
-					Details: []apperror.ErrorDetail{
-						{
-							Field:   "dueDate",
-							Code:    apperror.DetailInvalidFormat,
-							Message: "日付は YYYY-MM-DD 形式で入力してください",
-						},
-					},
-				})
-				return
-			}
-		}
 	}
 
 	userID := c.GetUint("user_id")
@@ -93,6 +61,63 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 	response.SuccessCreated(c, gin.H{
 		"task": res,
 	})
+}
+
+func validateCreateTaskInput(input *dto.CreateTaskInput) *apperror.APIError {
+	if err := validateTitle(input.Title); err != nil {
+		return err
+	}
+
+	if err := validateCreateDueDate(input); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateTitle(title string) *apperror.APIError {
+	if title != "" {
+		return nil
+	}
+
+	return &apperror.APIError{
+		Code:    apperror.CodeValidationError,
+		Message: "validation error",
+		Details: []apperror.ErrorDetail{
+			{
+				Field:   "title",
+				Code:    apperror.DetailRequired,
+				Message: "タイトルは必須です",
+			},
+		},
+	}
+}
+
+func validateCreateDueDate(input *dto.CreateTaskInput) *apperror.APIError {
+	if input.DueDate == nil {
+		return nil
+	}
+
+	if *input.DueDate == "" {
+		input.DueDate = nil
+		return nil
+	}
+
+	if _, err := time.Parse("2006-01-02", *input.DueDate); err != nil {
+		return &apperror.APIError{
+			Code:    apperror.CodeValidationError,
+			Message: "validation error",
+			Details: []apperror.ErrorDetail{
+				{
+					Field:   "dueDate",
+					Code:    apperror.DetailInvalidFormat,
+					Message: "日付は YYYY-MM-DD 形式で入力してください",
+				},
+			},
+		}
+	}
+
+	return nil
 }
 
 // GET /tasks
