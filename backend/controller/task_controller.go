@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -190,6 +191,11 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 		return
 	}
 
+	if apiErr := validateUpdateTaskInput(&input); apiErr != nil {
+		response.Error(c, http.StatusBadRequest, *apiErr)
+		return
+	}
+
 	task, err := tc.Service.UpdateTask(uint(id), userID, input)
 	if err != nil {
 		if apiErr, ok := err.(*apperror.APIError); ok {
@@ -215,6 +221,87 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 	response.Success(c, gin.H{
 		"task": res,
 	})
+}
+
+func validateUpdateTaskInput(input *dto.UpdateTaskRequest) *apperror.APIError {
+	details := []apperror.ErrorDetail{}
+
+	if input.Title != nil {
+		details = append(details, validateUpdateTitle(input)...)
+	}
+
+	if input.DueDate != nil {
+		details = append(details, validateUpdateDueDate(input)...)
+	}
+
+	if len(details) == 0 {
+		return nil
+	}
+
+	return &apperror.APIError{
+		Code:    apperror.CodeValidationError,
+		Message: "validation error",
+		Details: details,
+	}
+}
+
+func validateUpdateTitle(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
+	trimmed := strings.TrimSpace(*input.Title)
+	input.Title = &trimmed
+
+	return validateUpdateTitleValue(trimmed)
+}
+
+func validateUpdateTitleValue(title string) []apperror.ErrorDetail {
+	if title == "" {
+		return []apperror.ErrorDetail{
+			{
+				Field:   "title",
+				Code:    apperror.DetailRequired,
+				Message: "タイトルは必須です",
+			},
+		}
+	}
+
+	if utf8.RuneCountInString(title) > validation.TaskTitleMaxLength {
+		return []apperror.ErrorDetail{
+			{
+				Field:   "title",
+				Code:    apperror.DetailTooLong,
+				Message: fmt.Sprintf("タイトルは%d文字以内で入力してください", validation.TaskTitleMaxLength),
+			},
+		}
+	}
+
+	return nil
+}
+
+func validateUpdateDueDate(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
+	trimmed := strings.TrimSpace(*input.DueDate)
+
+	if trimmed == "" {
+		return []apperror.ErrorDetail{
+			{
+				Field:   "dueDate",
+				Code:    apperror.DetailInvalidFormat,
+				Message: "日付は空文字不可です",
+			},
+		}
+	}
+
+	if _, err := time.Parse("2006-01-02", trimmed); err != nil {
+		return []apperror.ErrorDetail{
+			{
+				Field:   "dueDate",
+				Code:    apperror.DetailInvalidFormat,
+				Message: "日付は YYYY-MM-DD 形式で入力してください",
+			},
+		}
+	}
+
+	input.DueDate = &trimmed
+
+	return nil
 }
 
 // DELETE /tasks/:id
