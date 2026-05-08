@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"net/mail"
 
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
@@ -69,6 +70,12 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 			Code:    apperror.DetailRequired,
 			Message: "メールアドレスは必須です",
 		})
+	} else if !isValidEmail(input.Email) {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "email",
+			Code:    apperror.DetailInvalidFormat,
+			Message: "メールアドレスの形式が不正です",
+		})
 	}
 
 	if input.Password == "" {
@@ -76,6 +83,12 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 			Field:   "password",
 			Code:    apperror.DetailRequired,
 			Message: "パスワードは必須です",
+		})
+	} else if len(input.Password) < 6 {
+		details = append(details, apperror.ErrorDetail{
+			Field:   "password",
+			Code:    apperror.DetailTooShort,
+			Message: "パスワードは6文字以上で入力してください",
 		})
 	}
 
@@ -145,4 +158,9 @@ func (uc *UserController) GetMe(c *gin.Context) {
 	response.Success(c, gin.H{
 		"user": res,
 	})
+}
+
+func isValidEmail(email string) bool {
+	address, err := mail.ParseAddress(email)
+	return err == nil && address.Address == email
 }
