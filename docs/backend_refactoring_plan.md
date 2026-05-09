@@ -89,9 +89,17 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - HTTP status は `APIError.Code` をもとに `MapErrorCodeToStatus` で決定する
 - JSON形式不正や型不正は validation error ではなく request形式不正として扱う
 
+### 3. controller 内 DTO 変換の重複整理
+
+- [x] controller 内 DTO 変換の重複整理
+
+補足：
+
+- `UserResponse` / `TaskResponse` の生成処理は DTO 側の変換 helper へ整理済み
+- controller 側は既存の `data` / `error` 構造を維持したまま、DTO 変換 helper を呼び出す形へ整理済み
+
 ### 3. 次フェーズ候補
 
-- [ ] controller 内 DTO 変換の重複整理
 - [ ] JWT / config 周りの責務整理
 
 ---
@@ -256,7 +264,7 @@ controller ごとの error response 組み立て：
 
 ### 3. controller 内 DTO 変換の重複整理
 
-優先度：中
+優先度：完了
 
 目的：
 
@@ -274,6 +282,12 @@ controller ごとの error response 組み立て：
 
 - 過剰な抽象化は行わない
 - mapper 層などの新しい大きな設計は導入しない
+
+完了済み：
+
+1. `UserResponse` / `TaskResponse` の生成 helper を DTO 側へ追加する
+2. controller 内の手書き response DTO 生成を helper 呼び出しへ置き換える
+3. APIレスポンスのキー名・構造を維持する
 
 ---
 
