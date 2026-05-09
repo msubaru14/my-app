@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
@@ -67,6 +66,8 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 func abortUnauthorized(c *gin.Context) {
-	response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
+	apiErr := apperror.NewUnauthorized()
+	status := apperror.MapErrorCodeToStatus(apiErr.Code)
+	response.Error(c, status, *apiErr)
 	c.Abort()
 }

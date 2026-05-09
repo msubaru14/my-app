@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,12 +20,12 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 	var input dto.CreateTaskInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
+		respondAPIError(c, apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
 	if apiErr := validateCreateTaskInput(&input); apiErr != nil {
-		response.Error(c, http.StatusBadRequest, *apiErr)
+		respondAPIError(c, apiErr)
 		return
 	}
 
@@ -40,7 +39,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 
 	createdTask, err := tc.Service.CreateTask(task)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
@@ -61,7 +60,7 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	tasks, err := tc.Service.GetTasksByUser(userID)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
@@ -86,7 +85,7 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
+		respondAPIError(c, apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -94,24 +93,23 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 
 	var input dto.UpdateTaskRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, *apperror.NewValidationError("validation error", nil))
+		respondAPIError(c, apperror.NewValidationError("validation error", nil))
 		return
 	}
 
 	if apiErr := validateUpdateTaskInput(&input); apiErr != nil {
-		response.Error(c, http.StatusBadRequest, *apiErr)
+		respondAPIError(c, apiErr)
 		return
 	}
 
 	task, err := tc.Service.UpdateTask(uint(id), userID, input)
 	if err != nil {
 		if apiErr, ok := err.(*apperror.APIError); ok {
-			status := apperror.MapErrorCodeToStatus(apiErr.Code)
-			response.Error(c, status, *apiErr)
+			respondAPIError(c, apiErr)
 			return
 		}
 
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
@@ -132,7 +130,7 @@ func (tc *TaskController) DeleteTask(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
+		respondAPIError(c, apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -141,12 +139,11 @@ func (tc *TaskController) DeleteTask(c *gin.Context) {
 	err = tc.Service.DeleteTask(uint(id), userID)
 	if err != nil {
 		if apiErr, ok := err.(*apperror.APIError); ok {
-			status := apperror.MapErrorCodeToStatus(apiErr.Code)
-			response.Error(c, status, *apiErr)
+			respondAPIError(c, apiErr)
 			return
 		}
 
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
