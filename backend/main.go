@@ -6,13 +6,14 @@ import (
 
 	"github.com/msubaru14/my-app-backend/controller"
 	"github.com/msubaru14/my-app-backend/db"
+	"github.com/msubaru14/my-app-backend/pkg/config"
 	"github.com/msubaru14/my-app-backend/repository"
 	"github.com/msubaru14/my-app-backend/router"
 	"github.com/msubaru14/my-app-backend/service"
 )
 
 func main() {
-	if os.Getenv("JWT_SECRET") == "" {
+	if config.JWTSecret() == "" {
 		log.Fatal("JWT_SECRET is required")
 	}
 
