@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/msubaru14/my-app-backend/pkg/apperror"
 	"github.com/msubaru14/my-app-backend/pkg/response"
 )
 
@@ -16,13 +18,13 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 
 		if authHeader == "" {
-			response.Unauthorized(c)
+			abortUnauthorized(c)
 			return
 		}
 
 		// "Bearer xxx" を分解
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			response.Unauthorized(c)
+			abortUnauthorized(c)
 			return
 		}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
@@ -35,25 +37,25 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			response.Unauthorized(c)
+			abortUnauthorized(c)
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			response.Unauthorized(c)
+			abortUnauthorized(c)
 			return
 		}
 
 		userIDValue, ok := claims["user_id"]
 		if !ok {
-			response.Unauthorized(c)
+			abortUnauthorized(c)
 			return
 		}
 
 		userIDFloat, ok := userIDValue.(float64)
 		if !ok {
-			response.Unauthorized(c)
+			abortUnauthorized(c)
 			return
 		}
 
@@ -62,4 +64,9 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func abortUnauthorized(c *gin.Context) {
+	response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
+	c.Abort()
 }

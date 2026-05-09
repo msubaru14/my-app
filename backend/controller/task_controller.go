@@ -21,11 +21,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 	var input dto.CreateTaskInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeInvalidRequest,
-			Message: "invalid request",
-			Details: nil,
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -44,10 +40,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 
 	createdTask, err := tc.Service.CreateTask(task)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 
@@ -68,10 +61,7 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	tasks, err := tc.Service.GetTasksByUser(userID)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 
@@ -96,11 +86,7 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeInvalidRequest,
-			Message: "invalid request",
-			Details: nil,
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -108,11 +94,7 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 
 	var input dto.UpdateTaskRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
-			Details: nil,
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewValidationError("validation error", nil))
 		return
 	}
 
@@ -129,10 +111,7 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 			return
 		}
 
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 
@@ -153,11 +132,7 @@ func (tc *TaskController) DeleteTask(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeInvalidRequest,
-			Message: "invalid request",
-			Details: nil,
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -171,10 +146,7 @@ func (tc *TaskController) DeleteTask(c *gin.Context) {
 			return
 		}
 
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 

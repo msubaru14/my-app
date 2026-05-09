@@ -24,10 +24,7 @@ type UserController struct {
 func (uc *UserController) GetUsers(c *gin.Context) {
 	users, err := uc.Service.GetUsers()
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 
@@ -50,10 +47,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	var input dto.CreateUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeInvalidRequest,
-			Message: "invalid request",
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -96,11 +90,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	}
 
 	if len(details) > 0 {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
-			Details: details,
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewValidationError("validation error", details))
 		return
 	}
 
@@ -113,10 +103,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	createdUser, err := uc.Service.CreateUser(user)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 
@@ -134,22 +121,19 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 func (uc *UserController) GetMe(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		response.Unauthorized(c)
+		response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
 		return
 	}
 
 	userID, ok := userIDValue.(uint)
 	if !ok {
-		response.Unauthorized(c)
+		response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
 		return
 	}
 
 	user, err := uc.Service.GetByID(userID)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, apperror.APIError{
-			Code:    apperror.CodeInternalServerError,
-			Message: "internal server error",
-		})
+		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
 		return
 	}
 

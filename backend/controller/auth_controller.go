@@ -19,10 +19,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 	var input dto.LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeInvalidRequest,
-			Message: "invalid request",
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -46,18 +43,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 			})
 		}
 
-		response.Error(c, http.StatusBadRequest, apperror.APIError{
-			Code:    apperror.CodeValidationError,
-			Message: "validation error",
-			Details: details,
-		})
+		response.Error(c, http.StatusBadRequest, *apperror.NewValidationError("validation error", details))
 		return
 	}
 
 	// 認証処理
 	token, err := ac.Service.Login(input.Email, input.Password)
 	if err != nil {
-		response.Unauthorized(c)
+		response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
 		return
 	}
 

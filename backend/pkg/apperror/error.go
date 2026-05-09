@@ -32,7 +32,7 @@ func MapErrorCodeToStatus(code string) int {
 }
 
 // INVALID_REQUEST生成
-func NewInvalidRequest(message string) error {
+func NewInvalidRequest(message string) *APIError {
 	return &APIError{
 		Code:    CodeInvalidRequest,
 		Message: message,
@@ -40,7 +40,7 @@ func NewInvalidRequest(message string) error {
 }
 
 // NOT_FOUND生成
-func NewNotFound(message string) error {
+func NewNotFound(message string) *APIError {
 	return &APIError{
 		Code:    CodeNotFound,
 		Message: message,
@@ -48,11 +48,27 @@ func NewNotFound(message string) error {
 }
 
 // バリデーションエラー生成
-func NewValidationError(message string, detail []ErrorDetail) error {
+func NewValidationError(message string, detail []ErrorDetail) *APIError {
 	return &APIError{
 		Code:    CodeValidationError,
 		Message: message,
 		Details: detail,
+	}
+}
+
+// INTERNAL_SERVER_ERROR生成
+func NewInternalServerError() *APIError {
+	return &APIError{
+		Code:    CodeInternalServerError,
+		Message: "internal server error",
+	}
+}
+
+// UNAUTHORIZED生成
+func NewUnauthorized() *APIError {
+	return &APIError{
+		Code:    CodeUnauthorized,
+		Message: "unauthorized",
 	}
 }
 
