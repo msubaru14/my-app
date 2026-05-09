@@ -43,12 +43,7 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		return
 	}
 
-	res := dto.TaskResponse{
-		ID:        createdTask.ID,
-		Title:     createdTask.Title,
-		Completed: createdTask.Completed,
-		DueDate:   createdTask.DueDate,
-	}
+	res := dto.NewTaskResponse(&createdTask)
 
 	response.SuccessCreated(c, gin.H{
 		"task": res,
@@ -64,16 +59,7 @@ func (tc *TaskController) GetTasks(c *gin.Context) {
 		return
 	}
 
-	res := make([]dto.TaskResponse, 0, len(tasks))
-
-	for _, t := range tasks {
-		res = append(res, dto.TaskResponse{
-			ID:        t.ID,
-			Title:     t.Title,
-			Completed: t.Completed,
-			DueDate:   t.DueDate,
-		})
-	}
+	res := dto.NewTaskResponses(tasks)
 
 	response.Success(c, gin.H{
 		"tasks": res,
@@ -113,12 +99,7 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	res := dto.TaskResponse{
-		ID:        task.ID,
-		Title:     task.Title,
-		Completed: task.Completed,
-		DueDate:   task.DueDate,
-	}
+	res := dto.NewTaskResponse(task)
 
 	response.Success(c, gin.H{
 		"task": res,

@@ -27,14 +27,7 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 		return
 	}
 
-	res := make([]dto.UserResponse, 0, len(users))
-	for _, u := range users {
-		res = append(res, dto.UserResponse{
-			ID:    u.ID,
-			Name:  u.Name,
-			Email: u.Email,
-		})
-	}
+	res := dto.NewUserResponses(users)
 
 	response.Success(c, gin.H{
 		"users": res,
@@ -106,11 +99,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	res := dto.UserResponse{
-		ID:    createdUser.ID,
-		Name:  createdUser.Name,
-		Email: createdUser.Email,
-	}
+	res := dto.NewUserResponse(createdUser)
 	response.SuccessCreated(c, gin.H{
 		"user": res,
 	})
@@ -136,11 +125,7 @@ func (uc *UserController) GetMe(c *gin.Context) {
 		return
 	}
 
-	res := dto.UserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-	}
+	res := dto.NewUserResponse(user)
 	response.Success(c, gin.H{
 		"user": res,
 	})
