@@ -93,7 +93,7 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 
 	var input dto.UpdateTaskRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		respondAPIError(c, apperror.NewValidationError("validation error", nil))
+		respondAPIError(c, apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
