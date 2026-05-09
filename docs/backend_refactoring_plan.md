@@ -39,7 +39,7 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 
 ### 気になる点
 
-- validation の置き場所が controller / service / DTO tag で揺れている
+- validation の責務整理は一区切りしたが、create/update 間で意図的に維持している仕様差分がある
 - error response の組み立て方が controller ごとにやや異なる
 - DTO 変換が controller 内に手書きで重複している
 - `model.Task` に JSON tag があり、DB model と API表現の境界が少し曖昧
@@ -48,11 +48,40 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 
 ---
 
+## ■ 進捗サマリ
+
+### 1. validation の責務整理
+
+- [x] validation の現状仕様を endpoint ごとに一覧化
+- [x] `POST /users` validation を controller 側へ整理
+- [x] `POST /tasks` validation を controller 側で整理
+- [x] `PATCH /tasks/:id` validation を request validation と業務ルールに分離
+- [x] task title 最大長仕様差分を整理
+- [x] task title validation を共通化
+- [x] task validation helper を `task_controller.go` から分離
+
+補足：
+
+- `POST /users` は DTO `binding` tag ではなく controller 側で validation detail を組み立てる形へ整理済み
+- `POST /tasks` / `PATCH /tasks/:id` の title validation は共通 helper を使う形へ整理済み
+- `PATCH /tasks/:id` の更新フィールド未指定、所有者チェック、not found 判定は service 側に維持
+- `POST /tasks` の title は既存どおり trim せず、`PATCH /tasks/:id` の title は既存どおり trim する
+- `POST /tasks` では `dueDate` 空文字を `nil` として扱い、`PATCH /tasks/:id` では validation error として扱う仕様差分を維持
+- `POST /tasks` で title と dueDate が同時に不正な場合は、validation details が配列であることに合わせて複数 details を返す
+
+### 2. 次フェーズ候補
+
+- [ ] apperror / response 利用方針の統一
+- [ ] controller 内 DTO 変換の重複整理
+- [ ] JWT / config 周りの責務整理
+
+---
+
 ## ■ 整理対象と優先順位
 
 ### 1. validation の責務整理
 
-優先度：高
+優先度：完了
 
 目的：
 
@@ -71,13 +100,14 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - validation はフロントエンドのエラー表示にも影響する
 - `error.code` / `details[].code` / `details[].message` の互換性を維持する
 
-現状の配置：
+現在の配置：
 
 - `ShouldBindJSON` による JSON request 形式チェックは controller で行っている
-- user登録の DTO には `binding` tag があるが、controller でも必須チェックを手書きしている
+- user登録の validation は controller で行い、DTO `binding` tag への依存は外している
 - login DTO / task DTO には `binding` tag がなく、controller または service で validation している
-- task作成の必須チェック・日付形式チェックは controller で行っている
-- task更新の未指定チェック・タイトル長さチェック・日付形式チェックは service で行っている
+- task作成の title / dueDate validation は controller helper で行っている
+- task更新の title / dueDate request validation は controller helper で行っている
+- task更新の未指定チェックは service で行っている
 - task更新・削除の所有者チェックと not found 判定は service / repository で行っている
 
 endpoint 別の validation 実装箇所：
@@ -85,9 +115,9 @@ endpoint 別の validation 実装箇所：
 | endpoint | request形式 | 必須チェック | 形式チェック | 業務ルール / 更新可否 |
 | --- | --- | --- | --- | --- |
 | `POST /login` | controller | controller | なし | 認証失敗は service 経由で unauthorized |
-| `POST /users` | controller / DTO `binding` tag | controller / DTO `binding` tag | DTO `binding` tag と controller 手書きvalidationが併存している。ただし `ShouldBindJSON` が先に実行されるため、binding tag に該当する入力不正は先に `INVALID_REQUEST` として返る。 | user作成、password hash は service |
-| `POST /tasks` | controller | controller | controller で `dueDate` を `YYYY-MM-DD` チェック | controller で `dueDate` 空文字を `nil` 化、作成処理は service |
-| `PATCH /tasks/:id` | controller | service | service で title長さ、`dueDate` を `YYYY-MM-DD` チェック | service で更新対象フィールド未指定、所有者チェック、not found 判定 |
+| `POST /users` | controller | controller | controller で email形式、password最小長をチェック | user作成、password hash は service |
+| `POST /tasks` | controller | controller helper | controller helper で title最大長、`dueDate` を `YYYY-MM-DD` チェック | controller で `dueDate` 空文字を `nil` 化、作成処理は service |
+| `PATCH /tasks/:id` | controller | controller helper | controller helper で title最大長、`dueDate` を `YYYY-MM-DD` チェック | service で更新対象フィールド未指定、所有者チェック、not found 判定 |
 | `DELETE /tasks/:id` | controller | なし | なし | service で所有者チェック、not found 判定 |
 
 validation 種別ごとの責務案：
@@ -124,27 +154,28 @@ validation 種別ごとの責務案：
 
 責務混在箇所：
 
-- user登録は DTO `binding` tag と controller 手書きvalidationが重複している
-- task作成は controller に必須チェック、日付形式チェック、空文字の `nil` 化がまとまっている
-- task更新は service に request値の trim、validation、更新値の補正、業務ルール、更新処理がまとまっている
+- user登録は controller validation に整理済み
+- task作成は controller helper に必須チェック、日付形式チェック、空文字の `nil` 化がまとまっている
+- task更新は controller helper が request validation と補正を担当し、service が業務ルールと更新処理を担当する
 - `ShouldBindJSON` 失敗時の error code が endpoint によって `INVALID_REQUEST` と `VALIDATION_ERROR` に分かれている
 
-適用順序：
+完了済み：
 
 1. validation の現状仕様を endpoint ごとに一覧化する
 2. `ShouldBindJSON` 失敗時の返却仕様を確認する
 3. user登録の DTO `binding` tag と controller 手書きvalidationの重複扱いを決める
 4. task作成の controller validation を、挙動を変えずに整理できる単位へ分ける
-5. task更新の service validation を、業務ルールと request validation に分けて整理できるか確認する
-6. `dueDate` の create/update 差分を仕様として維持するか、別Issueで判断する
+5. task更新の service validation を、業務ルールと request validation に分けて整理する
+6. task title 最大長仕様差分を整理し、create/update で共通化する
+7. task validation helper を controller 本体から分離する
 
-小さく実装する単位：
+仕様差分として維持しているもの：
 
-- endpoint別 validation 仕様表の作成
-- user登録 validation の重複整理
-- task作成 validation の責務整理
-- task更新 validation の責務整理
-- `dueDate` create/update 差分の仕様判断
+- `POST /tasks` の title は trim せず保存する
+- `PATCH /tasks/:id` の title は trim して更新する
+- `POST /tasks` の `dueDate` 空文字は `nil` として扱う
+- `PATCH /tasks/:id` の `dueDate` 空文字は validation error として扱う
+- `PATCH /tasks/:id` の `dueDate: null` は未指定扱いとなり、更新フィールドがなければ `INVALID_REQUEST` を返す
 
 ---
 
@@ -335,7 +366,6 @@ validation 種別ごとの責務案：
 
 ## ■ 今後のIssue候補
 
-- backend validation 責務整理方針の具体化
 - backend apperror / response 利用方針の統一
 - controller DTO変換の重複整理
 - JWT設定取得の責務整理
