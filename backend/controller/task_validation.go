@@ -21,11 +21,7 @@ func validateCreateTaskInput(input *dto.CreateTaskInput) *apperror.APIError {
 		return nil
 	}
 
-	return &apperror.APIError{
-		Code:    apperror.CodeValidationError,
-		Message: "validation error",
-		Details: details,
-	}
+	return apperror.NewValidationError("validation error", details)
 }
 
 func validateCreateDueDate(input *dto.CreateTaskInput) []apperror.ErrorDetail {
@@ -66,11 +62,7 @@ func validateUpdateTaskInput(input *dto.UpdateTaskRequest) *apperror.APIError {
 		return nil
 	}
 
-	return &apperror.APIError{
-		Code:    apperror.CodeValidationError,
-		Message: "validation error",
-		Details: details,
-	}
+	return apperror.NewValidationError("validation error", details)
 }
 
 func validateUpdateTitle(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
