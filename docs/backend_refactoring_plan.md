@@ -98,7 +98,7 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - `UserResponse` / `TaskResponse` の生成処理は DTO 側の変換 helper へ整理済み
 - controller 側は既存の `data` / `error` 構造を維持したまま、DTO 変換 helper を呼び出す形へ整理済み
 
-### 3. 次フェーズ候補
+### 4. 次フェーズ候補
 
 - [ ] JWT / config 周りの責務整理
 
