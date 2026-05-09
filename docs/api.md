@@ -432,12 +432,15 @@ Authorization: Bearer {token}
 ```json
 {
   "title": "string",
-  "dueDate": "YYYY-MM-DD",
+  "dueDate": "YYYY-MM-DD | null",
   "completed": true
 }
 
 ```
 ※ 任意フィールド（送信されたもののみ更新）
+※ dueDate: 未指定またはnullの場合は更新対象外
+※ dueDate: 空文字は禁止
+※ dueDateのnullによる削除は未対応
 
 #### レスポンス（成功）
 
@@ -477,6 +480,7 @@ Authorization: Bearer {token}
 - dueDate:
   - YYYY-MM-DD形式
   - 空文字は禁止
+  - 未指定またはnullの場合は更新対象外
   - nullによる削除は未対応
 - completed:
   - true / false
