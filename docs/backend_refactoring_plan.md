@@ -71,7 +71,7 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 
 ### 2. 次フェーズ候補
 
-- [ ] apperror / response 利用方針の統一（APIError生成 helper 化まで実施）
+- [ ] apperror / response 利用方針の統一（MapErrorCodeToStatus 適用範囲整理まで実施）
 - [ ] controller 内 DTO 変換の重複整理
 - [ ] JWT / config 周りの責務整理
 
@@ -212,9 +212,9 @@ controller ごとの error response 組み立て：
 
 | controller | invalid request | validation error | unauthorized | not found | internal server error |
 | --- | --- | --- | --- | --- | --- |
-| `auth_controller.go` | `apperror.NewInvalidRequest` を `response.Error` で返す | controller で details を組み立て、`apperror.NewValidationError` を `response.Error` で返す | service error を `apperror.NewUnauthorized` + `response.Error` に変換 | なし | なし |
-| `user_controller.go` | `apperror.NewInvalidRequest` を `response.Error` で返す | controller で details を組み立て、`apperror.NewValidationError` を `response.Error` で返す | `GetMe` の context 不正時に `apperror.NewUnauthorized` + `response.Error` | なし | `apperror.NewInternalServerError` を `response.Error` で返す |
-| `task_controller.go` | path / JSON request 不正は `apperror.NewInvalidRequest` を `response.Error` で返す。service 由来の `INVALID_REQUEST` は `MapErrorCodeToStatus` 経由 | controller helper が `apperror.NewValidationError` を返し `response.Error`。`PATCH /tasks/:id` の JSON bind error は `VALIDATION_ERROR` | middleware 側で `apperror.NewUnauthorized` + `response.Error` + `c.Abort()` | service 由来の `NOT_FOUND` を `MapErrorCodeToStatus` 経由で返す | `apperror.NewInternalServerError` を `response.Error` で返す |
+| `auth_controller.go` | `apperror.NewInvalidRequest` を `MapErrorCodeToStatus` 経由で返す | controller で details を組み立て、`apperror.NewValidationError` を `MapErrorCodeToStatus` 経由で返す | service error を `apperror.NewUnauthorized` + `MapErrorCodeToStatus` 経由で返す | なし | なし |
+| `user_controller.go` | `apperror.NewInvalidRequest` を `MapErrorCodeToStatus` 経由で返す | controller で details を組み立て、`apperror.NewValidationError` を `MapErrorCodeToStatus` 経由で返す | `GetMe` の context 不正時に `apperror.NewUnauthorized` + `MapErrorCodeToStatus` 経由で返す | なし | `apperror.NewInternalServerError` を `MapErrorCodeToStatus` 経由で返す |
+| `task_controller.go` | path / JSON request 不正は `apperror.NewInvalidRequest` を `MapErrorCodeToStatus` 経由で返す。service 由来の `INVALID_REQUEST` も同じ経路で返す | controller helper が `apperror.NewValidationError` を返し、`MapErrorCodeToStatus` 経由で返す。`PATCH /tasks/:id` の JSON bind error は `VALIDATION_ERROR` | middleware 側で `apperror.NewUnauthorized` + `MapErrorCodeToStatus` + `c.Abort()` | service 由来の `NOT_FOUND` を `MapErrorCodeToStatus` 経由で返す | `apperror.NewInternalServerError` を `MapErrorCodeToStatus` 経由で返す |
 
 実施済み：
 
@@ -223,10 +223,11 @@ controller ごとの error response 組み立て：
 - `NewInternalServerError` / `NewUnauthorized` を追加した
 - `response.Unauthorized` は削除し、`response` は HTTP response 出力、`apperror` は APIError 生成を担当する形へ寄せた
 - middleware では unauthorized response 後に `c.Abort()` する制御を維持した
+- controller で返す `APIError` は `respondAPIError` を通して `MapErrorCodeToStatus` で HTTP status を決める形へ整理した
+- middleware の unauthorized response も `MapErrorCodeToStatus` で HTTP status を決める形へ整理した
 
 残っている揺れ・次に決めること：
 
-- service 由来の `APIError` だけでなく、controller 内の `APIError` にも `MapErrorCodeToStatus` を使うか
 - `ShouldBindJSON` 失敗時の endpoint ごとの差分を既存仕様として維持するか、API仕様との整合を確認して別Issueで扱うか
 - `Details: nil` の明示有無を統一対象に含めるか
 - auth service は通常の `error` を返し、controller が unauthorized へ変換している。この扱いを維持するか、service error を `apperror` 化するか
@@ -240,7 +241,8 @@ controller ごとの error response 組み立て：
 - [x] service から返す error と controller で返す response の関係を整理
 - [x] 既存挙動を変えずに `APIError` 生成 helper へ寄せる範囲を決める
 - [x] `APIError` 生成 helper 化を最小差分で実装する
-- [ ] `MapErrorCodeToStatus` の適用範囲を決める
+- [x] `MapErrorCodeToStatus` の適用範囲を決める
+- [x] controller / middleware の `APIError` response を `MapErrorCodeToStatus` 経由へ整理する
 - [ ] `ShouldBindJSON` 失敗時の endpoint 差分を扱うか決める
 
 ---

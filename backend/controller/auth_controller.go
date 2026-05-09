@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
 	"github.com/msubaru14/my-app-backend/pkg/response"
@@ -19,7 +17,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 	var input dto.LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
+		respondAPIError(c, apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -43,14 +41,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 			})
 		}
 
-		response.Error(c, http.StatusBadRequest, *apperror.NewValidationError("validation error", details))
+		respondAPIError(c, apperror.NewValidationError("validation error", details))
 		return
 	}
 
 	// 認証処理
 	token, err := ac.Service.Login(input.Email, input.Password)
 	if err != nil {
-		response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
+		respondAPIError(c, apperror.NewUnauthorized())
 		return
 	}
 

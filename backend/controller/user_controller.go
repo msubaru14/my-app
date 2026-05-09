@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"net/mail"
 	"unicode/utf8"
 
@@ -24,7 +23,7 @@ type UserController struct {
 func (uc *UserController) GetUsers(c *gin.Context) {
 	users, err := uc.Service.GetUsers()
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
@@ -47,7 +46,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	var input dto.CreateUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.Error(c, http.StatusBadRequest, *apperror.NewInvalidRequest("invalid request"))
+		respondAPIError(c, apperror.NewInvalidRequest("invalid request"))
 		return
 	}
 
@@ -90,7 +89,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	}
 
 	if len(details) > 0 {
-		response.Error(c, http.StatusBadRequest, *apperror.NewValidationError("validation error", details))
+		respondAPIError(c, apperror.NewValidationError("validation error", details))
 		return
 	}
 
@@ -103,7 +102,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	createdUser, err := uc.Service.CreateUser(user)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
@@ -121,19 +120,19 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 func (uc *UserController) GetMe(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
+		respondAPIError(c, apperror.NewUnauthorized())
 		return
 	}
 
 	userID, ok := userIDValue.(uint)
 	if !ok {
-		response.Error(c, http.StatusUnauthorized, *apperror.NewUnauthorized())
+		respondAPIError(c, apperror.NewUnauthorized())
 		return
 	}
 
 	user, err := uc.Service.GetByID(userID)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, *apperror.NewInternalServerError())
+		respondAPIError(c, apperror.NewInternalServerError())
 		return
 	}
 
