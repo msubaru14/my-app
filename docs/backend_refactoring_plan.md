@@ -100,7 +100,13 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 
 ### 4. 次フェーズ候補
 
-- [ ] JWT / config 周りの責務整理
+- [x] JWT_SECRET 取得責務の整理
+
+補足：
+
+- `JWT_SECRET` の取得口は `pkg/config` の helper へ整理済み
+- 起動時チェック、token生成、token検証は同じ helper を経由する形へ整理済み
+- JWT仕様、claim名、有効期限、認証・認可挙動は維持
 
 ---
 
@@ -311,6 +317,20 @@ controller ごとの error response 組み立て：
 
 - auth 周辺は影響範囲が広いため、validation/error handling と同じPRで扱わない
 - package init 時の環境変数取得を見直す場合は、起動時挙動の確認を必須にする
+
+完了済み：
+
+1. `JWT_SECRET` の参照箇所を確認する
+2. `JWT_SECRET` の取得口を `pkg/config` に集約する
+3. `utils` の package init 時取得をやめ、token生成時に config helper 経由で取得する
+4. middleware の token検証時取得を config helper 経由へ揃える
+
+維持しているもの：
+
+- JWT署名方式
+- `user_id` claim
+- token有効期限
+- unauthorized response
 
 ---
 
