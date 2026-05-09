@@ -71,7 +71,7 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 
 ### 2. 次フェーズ候補
 
-- [ ] apperror / response 利用方針の統一（controllerごとの揺れ確認まで実施）
+- [ ] apperror / response 利用方針の統一（APIError生成 helper 化まで実施）
 - [ ] controller 内 DTO 変換の重複整理
 - [ ] JWT / config 周りの責務整理
 
@@ -203,34 +203,33 @@ validation 種別ごとの責務案：
 現状確認：
 
 - `response.Error` は `status` と `apperror.APIError` を受け取り、共通の `data: nil` / `error: apiErr` 形式で返している
-- `response.Unauthorized` は `UNAUTHORIZED` / `unauthorized` を返し、middleware / controller の認証エラーで共通利用されている
+- `UNAUTHORIZED` / `unauthorized` の `APIError` 生成は `apperror.NewUnauthorized` に寄せている
+- middleware の認証エラーは `response.Error` と `c.Abort()` を組み合わせて返している
 - `apperror.MapErrorCodeToStatus` は `INVALID_REQUEST` / `VALIDATION_ERROR` / `UNAUTHORIZED` / `NOT_FOUND` / `INTERNAL_SERVER_ERROR` を HTTP status に変換する
-- `apperror.NewInvalidRequest` / `NewNotFound` / `NewValidationError` は service から controller へ返す `APIError` 生成に使える
+- `apperror.NewInvalidRequest` / `NewNotFound` / `NewValidationError` / `NewInternalServerError` / `NewUnauthorized` は `APIError` 生成に使う
 
 controller ごとの error response 組み立て：
 
 | controller | invalid request | validation error | unauthorized | not found | internal server error |
 | --- | --- | --- | --- | --- | --- |
-| `auth_controller.go` | controller で `APIError` を直接生成し `response.Error` | controller で details を組み立て `response.Error` | service error を `response.Unauthorized` に変換 | なし | なし |
-| `user_controller.go` | controller で `APIError` を直接生成し `response.Error` | controller で details を組み立て `response.Error` | `GetMe` の context 不正時に `response.Unauthorized` | なし | controller で `APIError` を直接生成し `response.Error` |
-| `task_controller.go` | path / JSON request 不正は controller で `APIError` を直接生成し `response.Error`。service 由来の `INVALID_REQUEST` は `MapErrorCodeToStatus` 経由 | controller helper が `APIError` を返し `response.Error`。`PATCH /tasks/:id` の JSON bind error は `VALIDATION_ERROR` | middleware 側で `response.Unauthorized` | service 由来の `NOT_FOUND` を `MapErrorCodeToStatus` 経由で返す | controller で `APIError` を直接生成し `response.Error` |
+| `auth_controller.go` | `apperror.NewInvalidRequest` を `response.Error` で返す | controller で details を組み立て、`apperror.NewValidationError` を `response.Error` で返す | service error を `apperror.NewUnauthorized` + `response.Error` に変換 | なし | なし |
+| `user_controller.go` | `apperror.NewInvalidRequest` を `response.Error` で返す | controller で details を組み立て、`apperror.NewValidationError` を `response.Error` で返す | `GetMe` の context 不正時に `apperror.NewUnauthorized` + `response.Error` | なし | `apperror.NewInternalServerError` を `response.Error` で返す |
+| `task_controller.go` | path / JSON request 不正は `apperror.NewInvalidRequest` を `response.Error` で返す。service 由来の `INVALID_REQUEST` は `MapErrorCodeToStatus` 経由 | controller helper が `apperror.NewValidationError` を返し `response.Error`。`PATCH /tasks/:id` の JSON bind error は `VALIDATION_ERROR` | middleware 側で `apperror.NewUnauthorized` + `response.Error` + `c.Abort()` | service 由来の `NOT_FOUND` を `MapErrorCodeToStatus` 経由で返す | `apperror.NewInternalServerError` を `response.Error` で返す |
 
-揺れ：
+実施済み：
 
-- `APIError` を controller で直接組み立てる箇所と、service / helper から返った `APIError` を controller が返す箇所が混在している
-- `MapErrorCodeToStatus` は task の update / delete で service 由来の `APIError` にのみ使われている
-- `ShouldBindJSON` 失敗時の error code は endpoint ごとに `INVALID_REQUEST` と `VALIDATION_ERROR` が分かれている
-- `Details: nil` を明示する箇所と省略する箇所が混在している
-- `internal server error` は各 controller で同じ `APIError` を直接生成している
-- 認証失敗は `response.Unauthorized` に寄せられているが、auth service は通常の `error` を返し、controller が unauthorized へ変換している
+- controller / controller helper / response package にあった `apperror.APIError{...}` の直書きを `apperror` の生成 helper へ寄せた
+- `NewInvalidRequest` / `NewNotFound` / `NewValidationError` は `*APIError` を返す形へ整理した
+- `NewInternalServerError` / `NewUnauthorized` を追加した
+- `response.Unauthorized` は削除し、`response` は HTTP response 出力、`apperror` は APIError 生成を担当する形へ寄せた
+- middleware では unauthorized response 後に `c.Abort()` する制御を維持した
 
-次に決めること：
+残っている揺れ・次に決めること：
 
-- controller で直接 `response.Error` に渡す標準的な `APIError` 生成方法を用意するか
 - service 由来の `APIError` だけでなく、controller 内の `APIError` にも `MapErrorCodeToStatus` を使うか
 - `ShouldBindJSON` 失敗時の endpoint ごとの差分を既存仕様として維持するか、API仕様との整合を確認して別Issueで扱うか
 - `Details: nil` の明示有無を統一対象に含めるか
-- internal server error の組み立て重複を `response` または `apperror` 側の helper に寄せるか
+- auth service は通常の `error` を返し、controller が unauthorized へ変換している。この扱いを維持するか、service error を `apperror` 化するか
 
 今回の到達点：
 
@@ -239,8 +238,10 @@ controller ごとの error response 組み立て：
 - [x] `response.Error` の呼び出し方を確認
 - [x] `MapErrorCodeToStatus` の利用箇所を確認
 - [x] service から返す error と controller で返す response の関係を整理
-- [ ] 既存挙動を変えずに統一できる箇所を決める
-- [ ] 最小差分で実装する
+- [x] 既存挙動を変えずに `APIError` 生成 helper へ寄せる範囲を決める
+- [x] `APIError` 生成 helper 化を最小差分で実装する
+- [ ] `MapErrorCodeToStatus` の適用範囲を決める
+- [ ] `ShouldBindJSON` 失敗時の endpoint 差分を扱うか決める
 
 ---
 
