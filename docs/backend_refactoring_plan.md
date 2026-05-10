@@ -120,6 +120,20 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - `PATCH /tasks/:id` では `dueDate` 未指定を更新対象外、`dueDate: null` を期限削除として扱う
 - `PATCH /tasks/:id` の `dueDate: ""` は引き続き validation error として扱う
 
+### 6. DB / migration 定義差分確認
+
+- [x] GORM model tag と migration 定義の主要差分を確認
+- [x] DBスキーマ運用方針との整合性を確認
+- [x] 今後の検討候補を整理
+
+補足：
+
+- 現在のDBスキーマ定義の正本は migration とする
+- model tag は GORM の CRUD / mapping 用メタ情報として扱う
+- model tag と migration 定義の完全一致は必須条件にしない
+- 現時点で即修正が必要な不整合は見つかっていない
+- `model.Task` の JSON tag、foreign key / association / constraint tag、`not null` tag 明示要否は必要に応じて別Issueで扱う
+
 ---
 
 ## ■ 整理対象と優先順位
@@ -400,22 +414,49 @@ controller ごとの error response 組み立て：
 
 ### 6. DB / migration
 
-優先度：低
+優先度：完了
 
 目的：
 
-- 現時点では大きな変更対象にしない
-- migration の実行方式と既存スキーマを維持する
+- GORM model tag と migration 定義の差分を確認する
+- 現在のDBスキーマ運用方針と整合しているか整理する
+- 必要な修正候補を別Issueへ切り出せる状態にする
 
 方針：
 
 - DBスキーマ変更は行わない
 - migration方式の大幅変更は行わない
+- AutoMigrate は導入しない
 - GORM model tag と実DB定義の差分確認に留める
+- migration をDBスキーマ定義の正本として扱う
+- model tag は GORM の CRUD / mapping 用メタ情報として扱う
+- model tag と migration 定義の完全一致を目的化しない
 
 注意点：
 
 - DB変更は既存データ・起動処理・API挙動に影響するため、必要になった場合のみ単独Issueで扱う
+
+確認結果：
+
+- `users.name` / `users.email` / `users.password` は model の `size:255;not null` と migration の `VARCHAR(255) NOT NULL` が一致している
+- `users.email` は model の `uniqueIndex` と migration の unique index が一致している
+- `tasks.completed` は model の `default:false` と migration の `BOOLEAN NOT NULL DEFAULT FALSE` が整合している
+- `tasks.due_date` は model の `*string` / `type:text` と migration の nullable `TEXT` が整合している
+- `tasks.user_id` は model の `not null;index` と migration の `BIGINT NOT NULL` / index が整合している
+- `gorm.Model` 由来の `deleted_at` は migration 側にも index がある
+
+判断：
+
+- 現時点で即修正が必要な不整合は見つかっていない
+- `tasks.completed` の `NOT NULL` は migration 側で担保されており、AutoMigrate 非依存方針では model tag への追加は必須ではない
+- `tasks.user_id` の foreign key / `ON DELETE CASCADE` は migration 側のみの定義だが、migration を正本とする方針とは矛盾しない
+- `model.Task` の JSON tag は DB model と API表現の境界を曖昧にする論点として残す
+
+今後の検討候補：
+
+- `model.Task` の JSON tag を DTO 側へ寄せるか確認する
+- foreign key / association / constraint tag を model に持たせる必要があるか確認する
+- `tasks.completed` の `not null` tag 明示要否を確認する
 
 ---
 
@@ -498,7 +539,8 @@ controller ごとの error response 組み立て：
 - controller DTO変換の重複整理
 - JWT設定取得の責務整理
 - model JSON tag の扱い確認
-- DB model tag と migration 定義の差分確認
+- foreign key / association / constraint tag の扱い確認
+- `tasks.completed` の `not null` tag 明示要否確認
 
 ---
 
