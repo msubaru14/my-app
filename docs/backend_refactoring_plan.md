@@ -7,6 +7,16 @@
 
 本作業は **機能開発ではなくリファクタリングフェーズ** と位置付ける。
 
+## ■ 現在の状態
+
+backend リファクタリングフェーズは Step6 まで完了済み。
+
+validation、error handling、DTO変換、JWT/config、dueDate、DB/migration 方針の整理が完了しているため、
+本ドキュメントは Step6 完了時点の記録として扱う。
+
+controller / service / repository の責務境界見直しは、単なる構造整理ではなく設計判断を伴うため、
+次フェーズの **backend設計改善フェーズ** で別途扱う。
+
 ---
 
 ## ■ 基本原則
@@ -17,7 +27,7 @@
 2. **認証・認可挙動を変更しない**
 3. **DBスキーマを変更しない**
 4. **変更は最小単位で行う（1PR = 1目的）**
-5. **controller → service → repository の層構造を維持する**
+5. **controller -> service -> repository の層構造を維持する**
 6. **スコープ外の変更は行わない**
 
 ※ 本方針はリポジトリのルールにも準拠する。
@@ -462,7 +472,7 @@ controller ごとの error response 組み立て：
 
 ### 7. controller / service / repository
 
-優先度：低〜中
+優先度：次フェーズで扱う
 
 目的：
 
@@ -479,6 +489,13 @@ controller ごとの error response 組み立て：
 
 - service が厚くなること自体は問題にしない
 - ただし validation / error / DTO変換の責務が混ざる場合は、個別に整理する
+
+次フェーズで確認すること：
+
+- controller / service / repository の現状責務を確認する
+- 責務が詰まり始めている箇所を整理する
+- 現行レイヤード構成のまま改善できる範囲を整理する
+- usecase 層などの導入必要性は、現状の痛みを確認したうえで検討材料として扱う
 
 ---
 
