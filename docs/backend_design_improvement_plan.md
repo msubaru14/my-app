@@ -1,11 +1,11 @@
-# backend設計改善フェーズ 方針
+# backend設計改善フェーズ 調査書
 
 ## ■ 目的
 
 backend リファクタリング完了後の次フェーズとして、controller / service / repository の責務境界を確認し、今後の設計改善候補を整理する。
 
-このフェーズでは、実装変更や新アーキテクチャ導入を前提にしない。
-まず現状構成の痛み・限界・改善余地を確認し、必要性ベースで判断できる状態を作る。
+このドキュメントは、backend設計改善フェーズの判断材料をまとめた調査書として扱う。
+最終的な採用方針は `docs/backend_design_policy.md` に整理する。
 
 ---
 
@@ -267,9 +267,7 @@ task service は `apperror.APIError` を返す箇所がある。
 
 ## ■ 次の進め方
 
-1. service error 方針を整理する
-2. `TaskService.UpdateTask` の入力型依存を整理するか検討する
-3. user / auth validation helper 分離の必要性を確認する
-4. task service が厚くなる兆候を小さく観察する
+1. 調査結果をもとに、backend設計方針を `docs/backend_design_policy.md` に整理する
+2. 実装変更を伴う項目は別 Issue として分割する
 
 各項目は、実装変更を伴う場合は別 Issue として分割する。

@@ -87,6 +87,22 @@ HTTP PATCHの思想に沿い、フロントからの差分更新に柔軟に対�
 - Service: ビジネスロジック
 - Repository: DB操作
 
+### バックエンド設計方針
+
+バックエンドは controller -> service -> repository の3層構成を維持します。
+
+- Controller: HTTP request / response の制御
+- Service: 業務ルール、所有者チェック、更新可否判断
+- Repository: DBアクセス
+
+現時点では usecase 層や repository interface は導入していません。
+本アプリの規模では、まず既存3層の責務を明確にし、過剰な抽象化を避ける方針です。
+
+一方で、`TaskService` のように業務ルールが集まりやすい箇所では、service が HTTP request DTO に依存しすぎないよう service input の導入を検討します。
+repository interface は、unit test 導入時に DB 依存を切り離す必要が明確になった範囲から最小限で検討します。
+
+詳細は [backend設計方針](./docs/backend_design_policy.md) を参照してください。
+
 ### フロントエンド構成
 
 フロントエンドは feature 単位で画面・API・型・補助ロジックをまとめています。
@@ -210,9 +226,10 @@ docker compose up --build -d
 
 
 ## 🚧 今後の予定
-- 今日以外のタスク表示
-- UI/UXの改善
-- 認証強化（リフレッシュトークン）
+- TaskService など業務ルールが多い箇所から unit test を小さく追加
+- service input 導入による request DTO 依存の整理
+- 無料PaaS構成でのデプロイ
+- 必要に応じたUI/UX改善
 
 
 ## 🧠 設計の特徴
@@ -224,13 +241,33 @@ docker compose up --build -d
 - APIエラーの分類と表示用メッセージ整形を `useApiError` に集約
 - 認証・タスク管理を feature 単位で分離し、変更範囲を追いやすい構成に整理
 - feature の公開口を `index.ts` にまとめ、利用側から見える依存を簡潔に維持
+- backend は controller -> service -> repository の3層構成を維持
+- usecase 層や repository interface は、必要性が明確になるまで導入しない
+- service input / unit test は、業務ルールが多い箇所から小さく検討
 👉 実務を意識した設計にしています
 
 
-## ⚠️ 今後の改善・拡張予定
-- バリデーションロジックのService層への集約
-- テストコードの追加
-- レスポンシブ対応
+## ✅ 完成条件
+
+本アプリは、機能を増やし続けることよりも「設計と保守性を意識したWebアプリ」として完成させることを重視します。
+
+- ユーザー登録 / ログイン / ログインユーザー取得が安定して動作する
+- タスク作成 / 一覧 / 更新 / 削除が安定して動作する
+- API仕様、エラー形式、dueDate 仕様がドキュメント化されている
+- backend の責務分離方針を説明できる
+- frontend の feature 分割と error handling 方針を説明できる
+- TaskService など重要な業務ルールに unit test を小さく導入している
+- 無料PaaS構成でデプロイできる状態になっている
+
+## ☁️ デプロイ方針
+
+ポートフォリオとして公開しやすいよう、無料枠で始められるPaaS構成を想定します。
+
+- Frontend: Vercel
+- Backend: Render
+- Database: Neon
+
+デプロイ時も、API仕様・認証挙動・DBスキーマを変更しない方針を維持します。
 
 
 ## 📄 ライセンス

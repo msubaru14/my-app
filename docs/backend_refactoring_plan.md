@@ -17,6 +17,9 @@ validation、error handling、DTO変換、JWT/config、dueDate、DB/migration �
 controller / service / repository の責務境界見直しは、単なる構造整理ではなく設計判断を伴うため、
 次フェーズの **backend設計改善フェーズ** で別途扱う。
 
+backend設計改善フェーズの調査結果は `docs/backend_design_improvement_plan.md`、判断結果は `docs/backend_design_policy.md` に整理する。
+現時点では controller / service / repository の3層構成を維持し、usecase 層や repository interface は必要性が明確になった時点で小さく検討する。
+
 ---
 
 ## ■ 基本原則
@@ -496,6 +499,13 @@ controller ごとの error response 組み立て：
 - 責務が詰まり始めている箇所を整理する
 - 現行レイヤード構成のまま改善できる範囲を整理する
 - usecase 層などの導入必要性は、現状の痛みを確認したうえで検討材料として扱う
+
+判断結果：
+
+- controller / service / repository の3層構成は維持する
+- usecase 層は現時点では導入しない
+- service input は、HTTP request DTO 依存を弱める目的で必要箇所から検討する
+- repository interface は、unit test 導入時に必要性が明確な範囲で検討する
 
 ---
 
