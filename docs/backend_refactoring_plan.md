@@ -98,7 +98,7 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - `UserResponse` / `TaskResponse` の生成処理は DTO 側の変換 helper へ整理済み
 - controller 側は既存の `data` / `error` 構造を維持したまま、DTO 変換 helper を呼び出す形へ整理済み
 
-### 4. 次フェーズ候補
+### 4. JWT / config 周りの責務整理
 
 - [x] JWT_SECRET 取得責務の整理
 
@@ -107,6 +107,18 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - `JWT_SECRET` の取得口は `pkg/config` の helper へ整理済み
 - 起動時チェック、token生成、token検証は同じ helper を経由する形へ整理済み
 - JWT仕様、claim名、有効期限、認証・認可挙動は維持
+
+### 5. dueDate 仕様差分確認
+
+- [x] `PATCH /tasks/:id` の `dueDate: null` を期限削除として扱う
+- [x] frontend の task 編集で `dueDate: null` が送信されることを確認
+- [x] API仕様書 / backend refactoring 方針書 / README に最終仕様を反映
+
+補足：
+
+- `POST /tasks` の `dueDate` 挙動は変更しない
+- `PATCH /tasks/:id` では `dueDate` 未指定を更新対象外、`dueDate: null` を期限削除として扱う
+- `PATCH /tasks/:id` の `dueDate: ""` は引き続き validation error として扱う
 
 ---
 
@@ -336,25 +348,26 @@ controller ごとの error response 組み立て：
 
 ### 5. dueDate 仕様差分確認
 
-優先度：中
+優先度：完了
 
 目的：
 
 - task作成とtask更新における `dueDate` の扱い差分を明確にする
-- 既存仕様か、意図しない揺れかを判断できる状態にする
+- `PATCH /tasks/:id` の `null` / 空文字 / 未指定の意味を明確にする
 
-現状：
+最終仕様：
 
 - task作成では `dueDate` の空文字を `nil` として扱う
 - task更新では `dueDate` の空文字を validation error として扱う
+- task更新では `dueDate: null` を期限削除として扱う
 
 方針：
 
-- この方針書の段階では仕様変更しない
-- 実装修正前に、既存仕様として維持するか統一するかを判断する
-- 統一する場合はAPI仕様変更になり得るため、別Issueで扱う
+- `POST /tasks` の挙動は変更しない
+- `PATCH /tasks/:id` は部分更新APIとして、未指定と `null` を区別する
+- 空文字は引き続き不正値として扱う
 
-現状仕様整理：
+仕様整理：
 
 | request | `dueDate` 未指定 | `dueDate: null` | `dueDate: ""` | `dueDate: "YYYY-MM-DD"` | `dueDate` 不正形式 |
 | --- | --- | --- | --- | --- | --- |
@@ -365,28 +378,9 @@ controller ごとの error response 組み立て：
 
 - `PATCH /tasks/:id` の request DTO は未指定と `null` を区別できる専用型を使う
 - `PATCH /tasks/:id` は部分更新のため、未指定は「変更しない」を意味する
-- 現在の `PATCH /tasks/:id` では `null` による期限削除ができる
+- `PATCH /tasks/:id` では `null` による期限削除ができる
 - フロントエンドのタスク作成は空文字を `null` に変換して送信している
 - フロントエンドのタスク編集は日付入力が空の場合 `null` を送信している
-
-検討時の維持案：
-
-- `POST /tasks` はフォーム未入力を受け入れる作成APIとして、空文字・`null`・未指定を期限なしとして扱う
-- `PATCH /tasks/:id` は部分更新APIとして、空文字を不正値、未指定・`null` を更新対象外として扱う
-- メリット：既存API挙動、既存フロントエンド挙動、認証・validationレスポンスを変更しない
-- デメリット：create/update で空文字の意味が異なり、API利用側には説明が必要
-
-検討時の統一案：
-
-- 案A：`PATCH /tasks/:id` でも `dueDate: ""` を期限なし扱いにする
-  - メリット：create/update の空文字扱いが揃う
-  - デメリット：期限削除機能の追加に近く、既存の validation error 挙動が変わる
-- 案B：`POST /tasks` でも `dueDate: ""` を validation error にする
-  - メリット：空文字は不正値という解釈で揃う
-  - デメリット：既存の作成API挙動と frontend の送信許容範囲が変わる
-- 案C：`PATCH /tasks/:id` で `null` を期限削除として扱う
-  - メリット：部分更新APIとして期限削除の意味を表現できる
-  - デメリット：現在の `*string` DTO では未指定と `null` を区別できないため、DTOまたはJSON decode方針の見直しが必要
 
 判断：
 
@@ -400,6 +394,7 @@ controller ごとの error response 組み立て：
 - `dueDate: null` は service で `task.DueDate = nil` として扱い、期限を削除する
 - `dueDate` 未指定は更新対象外として扱う
 - `dueDate: ""` は従来どおり validation error とする
+- フロントエンドの task 編集では日付入力を空にすると `dueDate: null` が送信されることを確認済み
 
 ---
 
@@ -502,7 +497,6 @@ controller ごとの error response 組み立て：
 - backend apperror / response 利用方針の統一
 - controller DTO変換の重複整理
 - JWT設定取得の責務整理
-- task create/update の `dueDate` validation 差分確認
 - model JSON tag の扱い確認
 - DB model tag と migration 定義の差分確認
 
