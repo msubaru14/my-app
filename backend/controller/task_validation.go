@@ -54,7 +54,7 @@ func validateUpdateTaskInput(input *dto.UpdateTaskRequest) *apperror.APIError {
 		details = append(details, validateUpdateTitle(input)...)
 	}
 
-	if input.DueDate != nil {
+	if input.DueDate.IsSet && input.DueDate.Value != nil {
 		details = append(details, validateUpdateDueDate(input)...)
 	}
 
@@ -73,7 +73,7 @@ func validateUpdateTitle(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
 }
 
 func validateUpdateDueDate(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
-	trimmed := strings.TrimSpace(*input.DueDate)
+	trimmed := strings.TrimSpace(*input.DueDate.Value)
 
 	if trimmed == "" {
 		return []apperror.ErrorDetail{
@@ -95,7 +95,7 @@ func validateUpdateDueDate(input *dto.UpdateTaskRequest) []apperror.ErrorDetail 
 		}
 	}
 
-	input.DueDate = &trimmed
+	input.DueDate.Value = &trimmed
 
 	return nil
 }

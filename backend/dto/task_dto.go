@@ -1,6 +1,11 @@
 package dto
 
-import "github.com/msubaru14/my-app-backend/model"
+import (
+	"bytes"
+	"encoding/json"
+
+	"github.com/msubaru14/my-app-backend/model"
+)
 
 type CreateTaskInput struct {
 	Title   string  `json:"title"`
@@ -33,7 +38,29 @@ func NewTaskResponses(tasks []model.Task) []TaskResponse {
 }
 
 type UpdateTaskRequest struct {
-	Title     *string `json:"title"`
-	DueDate   *string `json:"dueDate"`
-	Completed *bool   `json:"completed"`
+	Title     *string      `json:"title"`
+	DueDate   PatchDueDate `json:"dueDate"`
+	Completed *bool        `json:"completed"`
+}
+
+type PatchDueDate struct {
+	IsSet bool
+	Value *string
+}
+
+func (d *PatchDueDate) UnmarshalJSON(data []byte) error {
+	d.IsSet = true
+
+	if bytes.Equal(data, []byte("null")) {
+		d.Value = nil
+		return nil
+	}
+
+	var value string
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+
+	d.Value = &value
+	return nil
 }
