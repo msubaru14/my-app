@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 
-	"github.com/msubaru14/my-app-backend/dto"
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
 	"github.com/msubaru14/my-app-backend/repository"
@@ -25,8 +24,8 @@ func (s *TaskService) GetTasksByUser(userID uint) ([]model.Task, error) {
 }
 
 // タスク更新
-func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest) (*model.Task, error) {
-	if !hasUpdateTaskFields(req) {
+func (s *TaskService) UpdateTask(id uint, userID uint, input UpdateTaskInput) (*model.Task, error) {
+	if !hasUpdateTaskFields(input) {
 		return nil, apperror.NewInvalidRequest("no fields to update")
 	}
 
@@ -39,16 +38,16 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 		return nil, err
 	}
 
-	if req.Title != nil {
-		task.Title = *req.Title
+	if input.Title != nil {
+		task.Title = *input.Title
 	}
 
-	if req.DueDate.IsSet {
-		task.DueDate = req.DueDate.Value
+	if input.DueDateSet {
+		task.DueDate = input.DueDate
 	}
 
-	if req.Completed != nil {
-		task.Completed = *req.Completed
+	if input.Completed != nil {
+		task.Completed = *input.Completed
 	}
 
 	// タスク更新
@@ -59,8 +58,8 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 	return task, nil
 }
 
-func hasUpdateTaskFields(req dto.UpdateTaskRequest) bool {
-	return req.Title != nil || req.DueDate.IsSet || req.Completed != nil
+func hasUpdateTaskFields(input UpdateTaskInput) bool {
+	return input.Title != nil || input.DueDateSet || input.Completed != nil
 }
 
 // タスク削除

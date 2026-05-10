@@ -88,7 +88,14 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	task, err := tc.Service.UpdateTask(uint(id), userID, input)
+	updateInput := service.UpdateTaskInput{
+		Title:      input.Title,
+		DueDateSet: input.DueDate.IsSet,
+		DueDate:    input.DueDate.Value,
+		Completed:  input.Completed,
+	}
+
+	task, err := tc.Service.UpdateTask(uint(id), userID, updateInput)
 	if err != nil {
 		if apiErr, ok := err.(*apperror.APIError); ok {
 			respondAPIError(c, apiErr)
