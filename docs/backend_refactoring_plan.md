@@ -354,6 +354,46 @@ controller ごとの error response 組み立て：
 - 実装修正前に、既存仕様として維持するか統一するかを判断する
 - 統一する場合はAPI仕様変更になり得るため、別Issueで扱う
 
+現状仕様整理：
+
+| request | `dueDate` 未指定 | `dueDate: null` | `dueDate: ""` | `dueDate: "YYYY-MM-DD"` | `dueDate` 不正形式 |
+| --- | --- | --- | --- | --- | --- |
+| `POST /tasks` | `nil` として作成 | `nil` として作成 | `nil` として作成 | 指定日付で作成 | `VALIDATION_ERROR` |
+| `PATCH /tasks/:id` | 更新対象外 | 未指定と同じ扱い。単独指定なら `INVALID_REQUEST` | `VALIDATION_ERROR` | 指定日付へ更新 | `VALIDATION_ERROR` |
+
+補足：
+
+- Go の request DTO は `*string` のため、`PATCH /tasks/:id` では未指定と `null` を区別できない
+- `PATCH /tasks/:id` は部分更新のため、未指定は「変更しない」を意味する
+- 現在の `PATCH /tasks/:id` では `null` による期限削除はできない
+- フロントエンドのタスク作成は空文字を `null` に変換して送信している
+- フロントエンドのタスク編集は日付入力が空の場合 `null` を送信している
+
+維持案：
+
+- `POST /tasks` はフォーム未入力を受け入れる作成APIとして、空文字・`null`・未指定を期限なしとして扱う
+- `PATCH /tasks/:id` は部分更新APIとして、空文字を不正値、未指定・`null` を更新対象外として扱う
+- メリット：既存API挙動、既存フロントエンド挙動、認証・validationレスポンスを変更しない
+- デメリット：create/update で空文字の意味が異なり、API利用側には説明が必要
+
+統一案：
+
+- 案A：`PATCH /tasks/:id` でも `dueDate: ""` を期限なし扱いにする
+  - メリット：create/update の空文字扱いが揃う
+  - デメリット：期限削除機能の追加に近く、既存の validation error 挙動が変わる
+- 案B：`POST /tasks` でも `dueDate: ""` を validation error にする
+  - メリット：空文字は不正値という解釈で揃う
+  - デメリット：既存の作成API挙動と frontend の送信許容範囲が変わる
+- 案C：`PATCH /tasks/:id` で `null` を期限削除として扱う
+  - メリット：部分更新APIとして期限削除の意味を表現できる
+  - デメリット：現在の `*string` DTO では未指定と `null` を区別できないため、DTOまたはJSON decode方針の見直しが必要
+
+判断：
+
+- 本Issueでは仕様変更せず、現状仕様を維持する
+- 実装修正する場合は、期限削除仕様を含めて別Issueで扱う
+- 次Issue候補は「`PATCH /tasks/:id` で `dueDate: null` を期限削除として扱うか検討する」
+
 ---
 
 ### 6. DB / migration
