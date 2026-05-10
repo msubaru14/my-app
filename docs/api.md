@@ -439,6 +439,7 @@ Authorization: Bearer {token}
 ```
 ※ 任意フィールド（送信されたもののみ更新）
 ※ dueDate: 未指定またはnullの場合は更新対象外
+※ ただし dueDate: null のみを送信した場合は、更新対象フィールドがないため INVALID_REQUEST
 ※ dueDate: 空文字は禁止
 ※ dueDateのnullによる削除は未対応
 
