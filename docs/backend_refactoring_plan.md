@@ -209,7 +209,7 @@ validation 種別ごとの責務案：
 - `PATCH /tasks/:id` の title は trim して更新する
 - `POST /tasks` の `dueDate` 空文字は `nil` として扱う
 - `PATCH /tasks/:id` の `dueDate` 空文字は validation error として扱う
-- `PATCH /tasks/:id` の `dueDate: null` は未指定扱いとなり、更新フィールドがなければ `INVALID_REQUEST` を返す
+- `PATCH /tasks/:id` の `dueDate: null` は期限削除として扱う
 
 ---
 
@@ -359,24 +359,24 @@ controller ごとの error response 組み立て：
 | request | `dueDate` 未指定 | `dueDate: null` | `dueDate: ""` | `dueDate: "YYYY-MM-DD"` | `dueDate` 不正形式 |
 | --- | --- | --- | --- | --- | --- |
 | `POST /tasks` | `nil` として作成 | `nil` として作成 | `nil` として作成 | 指定日付で作成 | `VALIDATION_ERROR` |
-| `PATCH /tasks/:id` | 更新対象外 | 未指定と同じ扱い。単独指定なら `INVALID_REQUEST` | `VALIDATION_ERROR` | 指定日付へ更新 | `VALIDATION_ERROR` |
+| `PATCH /tasks/:id` | 更新対象外 | 期限削除 | `VALIDATION_ERROR` | 指定日付へ更新 | `VALIDATION_ERROR` |
 
 補足：
 
-- Go の request DTO は `*string` のため、`PATCH /tasks/:id` では未指定と `null` を区別できない
+- `PATCH /tasks/:id` の request DTO は未指定と `null` を区別できる専用型を使う
 - `PATCH /tasks/:id` は部分更新のため、未指定は「変更しない」を意味する
-- 現在の `PATCH /tasks/:id` では `null` による期限削除はできない
+- 現在の `PATCH /tasks/:id` では `null` による期限削除ができる
 - フロントエンドのタスク作成は空文字を `null` に変換して送信している
 - フロントエンドのタスク編集は日付入力が空の場合 `null` を送信している
 
-維持案：
+検討時の維持案：
 
 - `POST /tasks` はフォーム未入力を受け入れる作成APIとして、空文字・`null`・未指定を期限なしとして扱う
 - `PATCH /tasks/:id` は部分更新APIとして、空文字を不正値、未指定・`null` を更新対象外として扱う
 - メリット：既存API挙動、既存フロントエンド挙動、認証・validationレスポンスを変更しない
 - デメリット：create/update で空文字の意味が異なり、API利用側には説明が必要
 
-統一案：
+検討時の統一案：
 
 - 案A：`PATCH /tasks/:id` でも `dueDate: ""` を期限なし扱いにする
   - メリット：create/update の空文字扱いが揃う
@@ -390,9 +390,16 @@ controller ごとの error response 組み立て：
 
 判断：
 
-- 本Issueでは仕様変更せず、現状仕様を維持する
-- 実装修正する場合は、期限削除仕様を含めて別Issueで扱う
-- 次Issue候補は「`PATCH /tasks/:id` で `dueDate: null` を期限削除として扱うか検討する」
+- `PATCH /tasks/:id` では `dueDate` 未指定を更新対象外、`dueDate: null` を期限削除として扱う
+- `POST /tasks` の `dueDate` 挙動は変更しない
+- 空文字は引き続き `VALIDATION_ERROR` とする
+
+実施結果：
+
+- `PATCH /tasks/:id` 専用の DTO 表現で `dueDate` の未指定 / `null` / 文字列を区別する
+- `dueDate: null` は service で `task.DueDate = nil` として扱い、期限を削除する
+- `dueDate` 未指定は更新対象外として扱う
+- `dueDate: ""` は従来どおり validation error とする
 
 ---
 

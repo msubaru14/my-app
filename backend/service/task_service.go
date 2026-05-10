@@ -43,8 +43,8 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 		task.Title = *req.Title
 	}
 
-	if req.DueDate != nil {
-		task.DueDate = req.DueDate
+	if req.DueDate.IsSet {
+		task.DueDate = req.DueDate.Value
 	}
 
 	if req.Completed != nil {
@@ -60,7 +60,7 @@ func (s *TaskService) UpdateTask(id uint, userID uint, req dto.UpdateTaskRequest
 }
 
 func hasUpdateTaskFields(req dto.UpdateTaskRequest) bool {
-	return req.Title != nil || req.DueDate != nil || req.Completed != nil
+	return req.Title != nil || req.DueDate.IsSet || req.Completed != nil
 }
 
 // タスク削除

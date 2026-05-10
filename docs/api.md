@@ -438,10 +438,9 @@ Authorization: Bearer {token}
 
 ```
 ※ 任意フィールド（送信されたもののみ更新）
-※ dueDate: 未指定またはnullの場合は更新対象外
-※ ただし dueDate: null のみを送信した場合は、更新対象フィールドがないため INVALID_REQUEST
+※ dueDate: 未指定の場合は更新対象外
+※ dueDate: null の場合は期限削除
 ※ dueDate: 空文字は禁止
-※ dueDateのnullによる削除は未対応
 
 #### レスポンス（成功）
 
@@ -452,7 +451,7 @@ Authorization: Bearer {token}
       "id": 1,
       "title": "string",
       "completed": true,
-      "dueDate": "YYYY-MM-DD"
+      "dueDate": "YYYY-MM-DD | null"
     }
   },
   "error": null
@@ -481,8 +480,8 @@ Authorization: Bearer {token}
 - dueDate:
   - YYYY-MM-DD形式
   - 空文字は禁止
-  - 未指定またはnullの場合は更新対象外
-  - nullによる削除は未対応
+  - 未指定の場合は更新対象外
+  - nullの場合は期限削除
 - completed:
   - true / false
 
