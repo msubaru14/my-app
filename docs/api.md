@@ -442,6 +442,16 @@ Authorization: Bearer {token}
 ※ dueDate: null の場合は期限削除
 ※ dueDate: 空文字は禁止
 
+#### dueDate の扱い
+
+| 指定内容 | 挙動 |
+| --- | --- |
+| 未指定 | 期限は変更しない |
+| `null` | 期限を削除する |
+| `""` | `VALIDATION_ERROR` |
+| `"YYYY-MM-DD"` | 指定日付へ更新 |
+| その他の形式 | `VALIDATION_ERROR` |
+
 #### レスポンス（成功）
 
 ```json

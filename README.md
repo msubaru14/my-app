@@ -41,7 +41,9 @@ Go、Typescript学習と個人開発のポートフォリオとして作成し�
 
 - title: 空文字・空白は禁止
 - dueDate: YYYY-MM-DD形式のみ許可
-- dueDateのnull更新（削除）は未対応
+- dueDate未指定: 変更なし
+- dueDate: null: 期限削除
+- dueDate: 空文字は禁止
 
 #### 設計意図
 
