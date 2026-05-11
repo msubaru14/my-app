@@ -14,12 +14,15 @@ type fakeTaskRepository struct {
 
 	findErr   error
 	updateErr error
+	deleteErr error
 
 	findCalled   bool
 	updateCalled bool
+	deleteCalled bool
 	findID       uint
 	findUserID   uint
 	updatedTask  *model.Task
+	deletedTask  *model.Task
 }
 
 func (r *fakeTaskRepository) Create(task model.Task) (model.Task, error) {
@@ -50,7 +53,10 @@ func (r *fakeTaskRepository) Update(task *model.Task) error {
 }
 
 func (r *fakeTaskRepository) Delete(task *model.Task) error {
-	return nil
+	r.deleteCalled = true
+	r.deletedTask = task
+
+	return r.deleteErr
 }
 
 func TestApplyUpdateTaskInput(t *testing.T) {
@@ -245,6 +251,93 @@ func TestTaskServiceUpdateTask(t *testing.T) {
 			}
 			if tt.repo.updateCalled != tt.wantUpdateCalled {
 				t.Fatalf("expected repository update called=%v, got %v", tt.wantUpdateCalled, tt.repo.updateCalled)
+			}
+		})
+	}
+}
+
+func TestTaskServiceDeleteTask(t *testing.T) {
+	findErr := errors.New("find failed")
+	deleteErr := errors.New("delete failed")
+
+	tests := []struct {
+		name             string
+		repo             *fakeTaskRepository
+		wantAPIErrorCode string
+		wantErr          error
+		wantFindCalled   bool
+		wantDeleteCalled bool
+	}{
+		{
+			name: "taskが存在する場合は所有者チェック付きで取得して削除する",
+			repo: &fakeTaskRepository{
+				task: &model.Task{
+					Title:  "task",
+					UserID: 2,
+				},
+			},
+			wantFindCalled:   true,
+			wantDeleteCalled: true,
+		},
+		{
+			name: "taskが見つからない場合は削除せずNOT_FOUNDを返す",
+			repo: &fakeTaskRepository{
+				findErr: gorm.ErrRecordNotFound,
+			},
+			wantAPIErrorCode: apperror.CodeNotFound,
+			wantFindCalled:   true,
+			wantDeleteCalled: false,
+		},
+		{
+			name: "取得時のrepository errorは削除せずそのまま返す",
+			repo: &fakeTaskRepository{
+				findErr: findErr,
+			},
+			wantErr:          findErr,
+			wantFindCalled:   true,
+			wantDeleteCalled: false,
+		},
+		{
+			name: "削除時のrepository errorはそのまま返す",
+			repo: &fakeTaskRepository{
+				task: &model.Task{
+					Title:  "task",
+					UserID: 2,
+				},
+				deleteErr: deleteErr,
+			},
+			wantErr:          deleteErr,
+			wantFindCalled:   true,
+			wantDeleteCalled: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service := &TaskService{Repo: tt.repo}
+
+			err := service.DeleteTask(1, 2)
+
+			if tt.wantAPIErrorCode == "" && tt.wantErr == nil && err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if tt.wantAPIErrorCode != "" {
+				assertAPIErrorCode(t, err, tt.wantAPIErrorCode)
+			}
+			if tt.wantErr != nil && !errors.Is(err, tt.wantErr) {
+				t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+			}
+			if tt.repo.findCalled != tt.wantFindCalled {
+				t.Fatalf("expected repository find called=%v, got %v", tt.wantFindCalled, tt.repo.findCalled)
+			}
+			if tt.wantFindCalled && (tt.repo.findID != 1 || tt.repo.findUserID != 2) {
+				t.Fatalf("expected find id=1 userID=2, got id=%d userID=%d", tt.repo.findID, tt.repo.findUserID)
+			}
+			if tt.repo.deleteCalled != tt.wantDeleteCalled {
+				t.Fatalf("expected repository delete called=%v, got %v", tt.wantDeleteCalled, tt.repo.deleteCalled)
+			}
+			if tt.wantDeleteCalled && tt.repo.deletedTask != tt.repo.task {
+				t.Fatalf("expected repository delete to receive found task")
 			}
 		})
 	}
