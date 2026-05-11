@@ -38,17 +38,7 @@ func (s *TaskService) UpdateTask(id uint, userID uint, input UpdateTaskInput) (*
 		return nil, err
 	}
 
-	if input.Title != nil {
-		task.Title = *input.Title
-	}
-
-	if input.DueDateSet {
-		task.DueDate = input.DueDate
-	}
-
-	if input.Completed != nil {
-		task.Completed = *input.Completed
-	}
+	applyUpdateTaskInput(task, input)
 
 	// タスク更新
 	if err := s.Repo.Update(task); err != nil {
@@ -60,6 +50,20 @@ func (s *TaskService) UpdateTask(id uint, userID uint, input UpdateTaskInput) (*
 
 func hasUpdateTaskFields(input UpdateTaskInput) bool {
 	return input.Title != nil || input.DueDateSet || input.Completed != nil
+}
+
+func applyUpdateTaskInput(task *model.Task, input UpdateTaskInput) {
+	if input.Title != nil {
+		task.Title = *input.Title
+	}
+
+	if input.DueDateSet {
+		task.DueDate = input.DueDate
+	}
+
+	if input.Completed != nil {
+		task.Completed = *input.Completed
+	}
 }
 
 // タスク削除
