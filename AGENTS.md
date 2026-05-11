@@ -2,37 +2,37 @@
 
 ---
 
-## ■ Purpose
+## ■ 目的
 
-This document defines the rules for Codex when working on this repository.
+この文書は、このリポジトリで Codex が作業する際のルールを定義する。
 
-The goal is to ensure:
+目的は以下を守ること。
 
-* Safe changes
-* Consistent implementation
-* Reviewable diffs
-* Minimal unnecessary work
-
----
-
-## ■ Project Overview
-
-This is a task management application.
-
-* Users can register and log in
-* Tasks can be created, updated, and deleted
-* Authentication is handled using JWT
-
-Current phase:
-
-* Backend refactoring and structure improvement (NOT feature development)
-* Backend refactoring progress and priorities are managed through Issues and `docs/backend_refactoring_plan.md`
-* Before starting backend refactoring tasks, check the relevant Issue and `docs/backend_refactoring_plan.md`
-* Frontend refactoring phase is completed; existing frontend rules remain as maintenance constraints
+* 安全な変更
+* 一貫した実装
+* レビューしやすい差分
+* 不要な作業の最小化
 
 ---
 
-## ■ Tech Stack
+## ■ プロジェクト概要
+
+このリポジトリはタスク管理アプリケーションである。
+
+* ユーザー登録・ログインができる
+* タスクを作成・更新・削除できる
+* 認証は JWT で行う
+
+現在のフェーズ:
+
+* Backend のリファクタリング・構造改善フェーズである（機能開発ではない）
+* Backend リファクタリングの進捗と優先順位は Issue と `docs/backend_refactoring_plan.md` で管理する
+* Backend リファクタリング作業を始める前に、関連 Issue と `docs/backend_refactoring_plan.md` を確認する
+* Frontend リファクタリングフェーズは完了済みであり、既存の Frontend ルールは保守制約として維持する
+
+---
+
+## ■ 技術スタック
 
 * Backend: Go
 * Frontend: React + TypeScript
@@ -41,7 +41,7 @@ Current phase:
 
 ---
 
-## ■ Directory Structure
+## ■ ディレクトリ構成
 
 ```txt
 .
@@ -78,288 +78,328 @@ Current phase:
         └── types
 ```
 
-### Rules
+### ルール
 
-* Backend must follow layer structure (controller → service → repository)
-* Frontend feature code must stay inside `features/{feature}`
-* Shared code must stay in common directories
-* Do not move files across layers unless instructed
+* Backend は layer 構造（controller → service → repository）に従う
+* Frontend の feature code は `features/{feature}` 配下に置く
+* 共有コードは common directory に置く
+* 指示がない限り、layer をまたいでファイルを移動しない
 
-### Frontend Feature Dependency Rules
+### Frontend feature 依存ルール
 
-* Feature public entry points must be `frontend/src/features/{feature}/index.ts`
-* Code outside a feature should import that feature through `features/{feature}`
-* Code outside a feature should not import directly from that feature's internal directories such as `components`, `hooks`, `api`, or `types`
-* Code inside the same feature may use relative imports to its own internal directories
-* Cross-feature dependencies should be kept minimal and explicit
-* Dependencies on `auth` from business features such as `tasks` are allowed when using authentication as shared application infrastructure
-* Reverse dependencies from `auth` to business features such as `tasks` are prohibited
-* Do not expose additional feature internals from `index.ts` unless the task explicitly requires it
-
----
-
-## ■ Core Principles
-
-1. Preserve existing behavior
-2. Keep tasks small
-3. Do not modify outside scope
-4. Do not mix concerns
-5. Do not guess
-6. Report uncertainties
-7. Always report results
+* Feature の public entry point は `frontend/src/features/{feature}/index.ts` とする
+* Feature 外のコードは、その feature を `features/{feature}` 経由で import する
+* Feature 外のコードは、`components`、`hooks`、`api`、`types` など feature 内部ディレクトリを直接 import しない
+* 同一 feature 内のコードは、自 feature の内部ディレクトリへ relative import してよい
+* Cross-feature dependency は最小限かつ明示的にする
+* `tasks` などの business feature が、認証を shared application infrastructure として `auth` に依存することは許容する
+* `auth` から `tasks` などの business feature へ逆依存することは禁止する
+* task が明示的に要求しない限り、`index.ts` から feature internals を追加公開しない
 
 ---
 
-## ■ Priority Order
+## ■ 基本原則
 
-1. Safety
-2. Readability
-3. Maintainability
-4. Extensibility
-5. Speed
-
----
-
-## ■ Investigation Rules (IMPORTANT)
-
-* Read only necessary files
-* Do not scan entire repo
-* Do not open files "just in case"
-* Keep investigation minimal
-
-If needed:
-
-* Explain why
-* List target files
+1. 既存挙動を維持する
+2. タスクを小さく保つ
+3. スコープ外を変更しない
+4. 関心事を混ぜない
+5. 推測しない
+6. 不明点を報告する
+7. 必ず結果を報告する
 
 ---
 
-## ■ Task Scope Rules
+## ■ 優先順位
 
-* 1 PR = 1 purpose
-* Keep changes small
-* Define scope clearly
-* Identify impact before changes
-
----
-
-## ■ Change Size Control
-
-- Prefer minimal diff
-- Avoid touching multiple files unless necessary
-- If change grows, stop and report
+1. 安全性
+2. 読みやすさ
+3. 保守性
+4. 拡張性
+5. 速度
 
 ---
 
-## ■ Refactoring Rules
+## ■ 調査ルール（重要）
 
-* Do not change behavior
-* Do not change UI
-* Do not introduce new architecture
-* Do not improve unrelated code
+* 必要なファイルだけ読む
+* リポジトリ全体をむやみに走査しない
+* 「念のため」だけで無関係なファイルを開かない
+* 調査は最小限にする
 
-If issues found:
+必要な場合:
 
-* Report separately
-
----
-
-## ■ Implementation Rules
-
-* Follow existing patterns
-* Follow naming conventions
-* Do not introduce new libraries
-* Do not change coding style
+* 理由を説明する
+* 対象ファイルを列挙する
 
 ---
 
-## ■ Before Implementation
+## ■ タスクスコープルール
 
-Before making changes:
-
-- Summarize understanding of the task
-- List target files
-- Confirm scope
-
-If any uncertainty exists:
-- Ask before proceeding
+* 1 PR = 1 目的
+* 変更は小さく保つ
+* スコープを明確にする
+* 変更前に影響範囲を特定する
 
 ---
 
-## ■ Understanding Verification
+## ■ 変更サイズ管理
 
-Codex may perform understanding checks to prevent work from becoming a black box for the Commander.
-
-This is an operational rule, not an implementation rule.
-The purpose is not to test or pressure the Commander, but to keep the Commander able to explain the purpose, scope, and impact of changes.
-
-Understanding checks should be performed when risk is high, such as:
-
-* Changes affect authentication, authorization, error handling, or shared code
-* Changes span multiple layers or features
-* A design decision affects future refactoring direction
-* Before creating a PR for changes with non-trivial impact
-
-For low-risk or routine changes, understanding checks do not need to be performed every time.
-Codex may perform them occasionally or randomly at natural stopping points to avoid excessive process overhead.
-
-When performing an understanding check, Codex should briefly confirm:
-
-* What changed
-* Why it changed
-* What behavior should remain unchanged
-* What risks or review points exist
-
-If the Commander has unclear points, Codex should explain before proceeding.
+* 最小限の差分を優先する
+* 必要がない限り、複数ファイルを触らない
+* 変更が大きくなり始めたら、作業を止めて報告する
 
 ---
 
-## ■ File Movement Rules
+## ■ 設計懸念の報告ルール
 
-* Move only specified files
-* Do not change logic
-* Fix imports only
-* Do not delete unrelated files
-* Verify after move
-* Do not delete files unless explicitly instructed
+Codex は既存挙動を維持することを優先する。
+ただし、既存の内部設計や実装詳細を、無条件に温存すべきものとして扱わない。
 
----
+「既存挙動を維持する」とは、ユーザーから見える挙動、API仕様、認証挙動、DBスキーマを維持することである。
+内部実装の細部をすべて固定することではない。
 
-## ■ Error Handling Rules
+既存の設計や実装によって、依頼された作業が不自然・高リスク・実装しづらい・テストしづらい状態になる場合、Codex は無理に実装を進める前に懸念を報告する。
 
-* Frontend error control must be based on `result.type` returned from `useApiError`
-* Do not branch by message text
-* API `error.code` must be used for control logic
-* API `error.message` may be used only as a display message candidate
-* Validation errors should use `details[].message` or normalized `result.message`
-* Minimal behavior changes are allowed to unify error handling and display
-* Avoid unrelated UI changes while updating error handling
-* Refer to `docs/frontend-error-handling.md` for the detailed policy
+以下につながる可能性がある場合は、設計懸念として報告する。
 
----
+* 不自然な差分
+* 壊れやすいテスト
+* 過剰な fake / mock / helper
+* 重複ロジック
+* 責務境界の曖昧化
+* 内部の呼び出し順序や実装詳細に寄りすぎたテスト assertion
+* Issue の目的に対して変更が大きくなりすぎる兆候
 
-## ■ Prohibited Actions
+設計懸念を報告する際は、以下を説明する。
 
-Do NOT:
+* どの既存設計・実装が懸念になっているか
+* なぜ現在のタスクに影響するか
+* 現在の Issue のブロッカーか、後続課題でよいか
+* 安全な進め方の選択肢
+* Codex の推奨案
 
-* Perform unrelated refactoring
-* Change behavior
-* Change architecture
-* Read unrelated files
-* Guess requirements
-* Add dependencies
-* Modify UI
-* Combine concerns
+Codex は自己判断でスコープを広げない。
+懸念が現在の Issue 範囲を超える場合は、無関係な設計変更を加えず、報告して別 Issue 化を提案する。
+
+既存実装に多少の扱いづらさがあっても、許容範囲であれば作業を続行してよい。
+ただし、そのまま進めることで壊れやすいテスト、過剰な mocking、重複ロジック、責務の曖昧化を固定しそうな場合は、先に小さな準備 Issue を提案する。
 
 ---
 
-## ■ Git Workflow Rules
+## ■ スコープ管理ルール
 
-* Always create a new branch from latest main
-* Do not reuse old branches
-* 1 branch = 1 purpose
-* Verify diff before PR (`git diff origin/main`)
-* Trust GitHub PR diff over local diff
-* If history is broken, create a new branch
+Codex は不要なスコープ拡大を避ける。
 
-Do NOT:
+目的は「差分量を極限まで減らすこと」ではない。
+目的は、現在の Issue の目的から逸脱せず、安全で読みやすく、保守しやすく、テストしやすい変更にすることである。
 
-* Mix multiple changes in one branch
-* Commit unrelated files
+現在の Issue を直接支える小さな補助的整理は許容する。
 
----
+許容する補助的変更:
 
-## ■ Verification Rules
+* 小さな helper 分離
+* 現在スコープ内での責務整理
+* 現在スコープ内でのテストしやすさ改善
+* 現在スコープ内での重複削減
+* 現在作業に直接関係する命名整理
 
-When performing frontend browser operation checks, refer to `docs/codex-browser-check.md`.
+許容しない補助的変更:
 
-Use that document for:
+* feature をまたぐ再設計
+* アーキテクチャ置き換え
+* 大規模 package 再編
+* 広範囲な抽象化導入
+* 無関係な cleanup
 
-* Local startup assumptions
-* Browser operation method
-* Check points
-* Change-specific checks
-* Result reporting format
-
-In addition to the standard scenario, verify behavior that matches the actual change.
-
-Examples:
-
-* Each branch of a changed condition
-* Guard behavior moved or reorganized by the change
-* Boundary cases such as unauthenticated, invalid token, empty data, and API error states
-
-If the document cannot be followed:
-
-* Report what could not be verified
-* Explain why
-* Do not guess the result
+補助的変更が大きくなり始めた場合は、作業を止めて別 Issue 化を提案する。
 
 ---
 
-## ■ Reporting Rules
+## ■ リファクタリングルール
 
-After task completion, report:
+* 挙動を変えない
+* UI を変えない
+* 新しいアーキテクチャを導入しない
+* 無関係なコード改善をしない
 
-* Purpose
-* Changes
-* Files changed
-* Impact scope
-* Verification
-* Risk level
-* Concerns
+問題を見つけた場合:
 
----
-
-## ■ PR Template Integration (IMPORTANT)
-
-Codex must follow the repository PR template.
-
-* The PR template is located at `.github/pull_request_template.md`; read this file directly before creating a PR.
-* Ensure all required sections are filled
-* Ensure checklist items are verified
-* Ensure scope rules are satisfied
-* Ensure behavior is preserved
-
-If any checklist item cannot be confirmed:
-
-* Report explicitly
+* 別途報告する
 
 ---
 
-## ■ Issue Template Integration
+## ■ 実装ルール
 
-When creating a bug report issue, Codex must follow the repository bug report template.
-
-* The bug report template is located at `.github/ISSUE_TEMPLATE/bug_report.md`; read this file directly before creating a bug report issue.
-* Fill in the issue using the template sections.
-* Do not mix bug reports with refactoring or feature tasks.
-
----
-
-## Encoding Rules
-
-* Markdown, TypeScript, JavaScript, CSS, JSON, and Go files are UTF-8.
-* When reading files in PowerShell, use `Get-Content -Encoding UTF8` for text files that may contain Japanese.
-* Do not treat mojibake from the terminal output as file corruption until the file has been re-read as UTF-8.
+* 既存パターンに従う
+* 命名規則に従う
+* 新しいライブラリを導入しない
+* コーディングスタイルを変えない
 
 ---
 
-## ■ When Unsure
+## ■ 実装前
 
-Do not guess.
+変更前に以下を行う。
 
-Instead report:
+* タスク理解を要約する
+* 対象ファイルを列挙する
+* スコープを確認する
 
-* What is unclear
-* Why it matters
-* Possible options
-* Safest recommendation
+不明点がある場合:
+
+* 作業前に確認する
 
 ---
 
-## ■ Task Instructions Take Priority
+## ■ ファイル移動ルール
 
-Task instructions override this document when more specific.
+* 指定されたファイルだけ移動する
+* logic を変更しない
+* import の修正だけ行う
+* 無関係なファイルを削除しない
+* 移動後に検証する
+* 明示的に指示されない限り、ファイルを削除しない
+
+---
+
+## ■ エラーハンドリングルール
+
+* Frontend の error control は `useApiError` が返す `result.type` に基づいて行う
+* message text で分岐しない
+* API `error.code` は制御ロジックに使用する
+* API `error.message` は表示メッセージ候補としてのみ使用してよい
+* Validation error は `details[].message` または正規化された `result.message` を使用する
+* Error handling と表示を統一するための最小限の挙動変更は許容する
+* Error handling 更新時に無関係な UI 変更をしない
+* 詳細方針は `docs/frontend-error-handling.md` を参照する
+
+---
+
+## ■ 禁止事項
+
+以下を行わない。
+
+* 無関係なリファクタリング
+* 挙動変更
+* アーキテクチャ変更
+* 無関係なファイルの読み取り
+* 要件の推測
+* 依存関係の追加
+* UI 変更
+* 関心事の混在
+
+---
+
+## ■ Git ワークフロールール
+
+* 常に最新の main から新しいブランチを作成する
+* 古いブランチを再利用しない
+* 1 branch = 1 目的
+* 作業を行った場合、原則としてコミット前で止める
+* commit、push、PR 作成は、Commander から明示的に依頼された場合のみ行う
+* PR 前に差分を確認する（`git diff origin/main`）
+* ローカル差分より GitHub の PR 差分を信頼する
+* history が壊れている場合は、新しいブランチを作成する
+
+以下を行わない。
+
+* 複数の変更を1つのブランチに混ぜる
+* 無関係なファイルを commit する
+
+---
+
+## ■ 検証ルール
+
+Frontend のブラウザ操作確認を行う場合は、`docs/codex-browser-check.md` を参照する。
+
+この文書は以下に使用する。
+
+* local startup assumptions
+* browser operation method
+* check points
+* change-specific checks
+* result reporting format
+
+標準シナリオに加えて、実際の変更内容に合う挙動を確認する。
+
+例:
+
+* 変更した条件分岐それぞれ
+* 移動・整理した guard の挙動
+* 未認証、invalid token、empty data、API error states などの境界ケース
+
+この文書に従えない場合:
+
+* 検証できなかった内容を報告する
+* 理由を説明する
+* 結果を推測しない
+
+---
+
+## ■ 報告ルール
+
+作業完了後、以下を報告する。
+
+* 目的
+* 変更内容
+* 変更ファイル
+* 影響範囲
+* 検証
+* リスクレベル
+* 懸念点
+
+---
+
+## ■ PR テンプレート連携（重要）
+
+Codex は repository の PR テンプレートに従う。
+
+* PR テンプレートは `.github/pull_request_template.md` にあるため、PR 作成前に直接読む
+* 必須セクションをすべて記入する
+* チェックリスト項目を確認する
+* スコープルールを満たす
+* 挙動が維持されていることを確認する
+
+確認できないチェックリスト項目がある場合:
+
+* 明示的に報告する
+
+---
+
+## ■ Issue テンプレート連携
+
+Bug report issue を作成する場合、Codex は repository の bug report テンプレートに従う。
+
+* Bug report テンプレートは `.github/ISSUE_TEMPLATE/bug_report.md` にあるため、直接読む
+* テンプレートのセクションに従って issue を記入する
+* bug report と refactoring / feature task を混ぜない
+
+---
+
+## ■ エンコーディングルール
+
+* Markdown、TypeScript、JavaScript、CSS、JSON、Go files は UTF-8 とする
+* 日本語を含む可能性がある text file を PowerShell で読む場合は `Get-Content -Encoding UTF8` を使う
+* Terminal output の mojibake は、UTF-8 で再読込するまで file corruption と判断しない
+
+---
+
+## ■ 迷った場合
+
+推測しない。
+
+代わりに以下を報告する。
+
+* 何が不明か
+* なぜ重要か
+* 考えられる選択肢
+* 最も安全な推奨案
+
+---
+
+## ■ タスク指示の優先
+
+より具体的なタスク指示がある場合、その指示はこの文書より優先される。
 
 ---
