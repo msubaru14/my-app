@@ -5,12 +5,19 @@ import (
 
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
-	"github.com/msubaru14/my-app-backend/repository"
 	"gorm.io/gorm"
 )
 
+type taskRepository interface {
+	Create(task model.Task) (model.Task, error)
+	FindByUserID(userID uint) ([]model.Task, error)
+	FindByIDAndUserID(id uint, userID uint) (*model.Task, error)
+	Update(task *model.Task) error
+	Delete(task *model.Task) error
+}
+
 type TaskService struct {
-	Repo *repository.TaskRepository
+	Repo taskRepository
 }
 
 // タスク作成
