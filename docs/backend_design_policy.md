@@ -74,6 +74,50 @@ service が HTTP request DTO に依存しすぎないよう、必要な箇所か
 
 ---
 
+## ■ service error の扱い
+
+現時点では service error の一括統一は行わない。
+
+controller / service / repository の3層構成では、controller が HTTP response への変換を担当し、service は業務ルール、所有者チェック、更新可否判断を担当する。
+そのため、service が HTTP status を直接意識する形には寄せない。
+
+ただし、service が判定した業務エラーを controller へ code として伝える必要がある場合は、既存の `apperror.APIError` を使ってよい。
+controller は受け取った `apperror.APIError` を `respondAPIError` 経由で API response に変換する。
+
+現状整理：
+
+| 対象 | service が返す error | controller の扱い | 判断 |
+| --- | --- | --- | --- |
+| task | 更新対象なし、not found を `apperror.APIError` として返す。repository error は通常の `error` として返す | `apperror.APIError` は code に応じて response 化し、それ以外は internal server error に変換する | 業務エラーを service が判断しているため現状維持 |
+| auth | 認証失敗を通常の `error` として返す。token生成失敗も通常の `error` として返す | login 失敗時は unauthorized response に変換する | 認証失敗の詳細を外へ出さない目的があるため現状維持 |
+| user | hash生成、repository error を通常の `error` として返す | internal server error に変換する | 現状では API code を service から明示する必要がないため現状維持 |
+
+方針：
+
+- controller は HTTP request / response の制御と、error response への変換を担当する
+- service は業務ルール上の失敗を判断する
+- service が返す `apperror.APIError` は、HTTP response そのものではなく、controller に伝える API error code と message として扱う
+- repository error は、service で業務上の意味に変換できるものだけ変換する
+- repository error を業務エラーとして判断できない場合は、通常の `error` のまま controller へ返す
+- controller は通常の `error` を原則として internal server error に変換する
+- auth の認証失敗は、user の存在有無や password 不一致を区別せず、controller で unauthorized に変換する
+- task / auth / user の責務差分は、業務上の意味が異なるため無理に揃えない
+
+判断：
+
+- `apperror.APIError` は controller 専用ではなく、service が業務エラー code を返す必要がある場合に限って利用する
+- service 全体を `apperror.APIError` へ寄せる実装変更は、現時点では行わない
+- APIレスポンス形式、HTTP status、error code は変更しない
+- error 方針の実装変更が必要になった場合は、個別の Issue として扱う
+
+今後の検討候補：
+
+- service error 用の domain error を別途導入する必要があるか確認する
+- auth service の認証失敗を通常の `error` のまま維持するか、code を持つ業務エラーとして表すか確認する
+- task service の `apperror.APIError` 利用が増えた場合、service error 方針を再確認する
+
+---
+
 ## ■ unit test 導入方針
 
 unit test は一括導入せず、業務ルールが多い箇所から小さく追加する。
@@ -127,5 +171,5 @@ unit test は一括導入せず、業務ルールが多い箇所から小さく�
 1. `TaskService.UpdateTask` の service input 導入要否を検討する
 2. TaskService から unit test を小さく導入する
 3. unit test 導入時に repository interface の必要性を確認する
-4. service error 方針を整理する
+4. service error 方針に基づき、実装変更が必要な箇所が出た場合は個別 Issue で扱う
 5. user / auth validation helper 分離の必要性を確認する
