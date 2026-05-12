@@ -30,13 +30,30 @@ func TestValidateCreateTaskInput(t *testing.T) {
 			wantDueDate: stringPtr("2026-05-11"),
 		},
 		{
-			name: "createのtitleはtrimしない",
+			name: "createのtitleはtrimする",
 			input: dto.CreateTaskInput{
 				Title:   "  task  ",
 				DueDate: nil,
 			},
-			wantTitle:   "  task  ",
+			wantTitle:   "task",
 			wantDueDate: nil,
+		},
+		{
+			name: "createのtitleはtrim後に空ならREQUIREDを返す",
+			input: dto.CreateTaskInput{
+				Title:   "   ",
+				DueDate: nil,
+			},
+			wantTitle:        "",
+			wantDueDate:      nil,
+			wantAPIErrorCode: apperror.CodeValidationError,
+			wantDetails: []apperror.ErrorDetail{
+				{
+					Field:   "title",
+					Code:    apperror.DetailRequired,
+					Message: "タイトルは必須です",
+				},
+			},
 		},
 		{
 			name: "titleが空の場合はREQUIREDを返す",

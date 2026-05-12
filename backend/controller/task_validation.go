@@ -14,7 +14,7 @@ import (
 func validateCreateTaskInput(input *dto.CreateTaskInput) *apperror.APIError {
 	details := []apperror.ErrorDetail{}
 
-	details = append(details, validateTitle(input.Title)...)
+	details = append(details, validateTitle(&input.Title)...)
 	details = append(details, validateCreateDueDate(input)...)
 
 	if len(details) == 0 {
@@ -51,7 +51,7 @@ func validateUpdateTaskInput(input *dto.UpdateTaskRequest) *apperror.APIError {
 	details := []apperror.ErrorDetail{}
 
 	if input.Title != nil {
-		details = append(details, validateUpdateTitle(input)...)
+		details = append(details, validateTitle(input.Title)...)
 	}
 
 	if input.DueDate.IsSet && input.DueDate.Value != nil {
@@ -63,13 +63,6 @@ func validateUpdateTaskInput(input *dto.UpdateTaskRequest) *apperror.APIError {
 	}
 
 	return apperror.NewValidationError("validation error", details)
-}
-
-func validateUpdateTitle(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
-	trimmed := strings.TrimSpace(*input.Title)
-	input.Title = &trimmed
-
-	return validateTitle(trimmed)
 }
 
 func validateUpdateDueDate(input *dto.UpdateTaskRequest) []apperror.ErrorDetail {
@@ -100,8 +93,11 @@ func validateUpdateDueDate(input *dto.UpdateTaskRequest) []apperror.ErrorDetail 
 	return nil
 }
 
-func validateTitle(title string) []apperror.ErrorDetail {
-	if title == "" {
+func validateTitle(title *string) []apperror.ErrorDetail {
+	trimmed := strings.TrimSpace(*title)
+	*title = trimmed
+
+	if trimmed == "" {
 		return []apperror.ErrorDetail{
 			{
 				Field:   "title",
@@ -111,7 +107,7 @@ func validateTitle(title string) []apperror.ErrorDetail {
 		}
 	}
 
-	if utf8.RuneCountInString(title) > validation.TaskTitleMaxLength {
+	if utf8.RuneCountInString(trimmed) > validation.TaskTitleMaxLength {
 		return []apperror.ErrorDetail{
 			{
 				Field:   "title",

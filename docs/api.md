@@ -317,7 +317,7 @@ Authorization: Bearer {token}
 }
 ```
 
-※ title: 最大100文字
+※ title: 前後空白は除去される。空文字・空白のみは禁止。最大100文字
 ※ dueDate: 任意（未指定または空文字の場合はnullとして扱う）  
 ※ 形式: YYYY-MM-DD
 

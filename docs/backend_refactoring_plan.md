@@ -78,7 +78,7 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - `POST /users` は DTO `binding` tag ではなく controller 側で validation detail を組み立てる形へ整理済み
 - `POST /tasks` / `PATCH /tasks/:id` の title validation は共通 helper を使う形へ整理済み
 - `PATCH /tasks/:id` の更新フィールド未指定、所有者チェック、not found 判定は service 側に維持
-- `POST /tasks` の title は既存どおり trim せず、`PATCH /tasks/:id` の title は既存どおり trim する
+- `POST /tasks` / `PATCH /tasks/:id` の title は trim する
 - `POST /tasks` では `dueDate` 空文字を `nil` として扱い、`PATCH /tasks/:id` では validation error として扱う仕様差分を維持
 - `POST /tasks` で title と dueDate が同時に不正な場合は、validation details が配列であることに合わせて複数 details を返す
 
@@ -244,8 +244,7 @@ validation 種別ごとの責務案：
 
 仕様差分として維持しているもの：
 
-- `POST /tasks` の title は trim せず保存する
-- `PATCH /tasks/:id` の title は trim して更新する
+- `POST /tasks` / `PATCH /tasks/:id` の title は trim する
 - `POST /tasks` の `dueDate` 空文字は `nil` として扱う
 - `PATCH /tasks/:id` の `dueDate` 空文字は validation error として扱う
 - `PATCH /tasks/:id` の `dueDate: null` は期限削除として扱う
