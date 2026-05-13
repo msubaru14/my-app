@@ -320,6 +320,7 @@ Authorization: Bearer {token}
 ※ title: 前後空白は除去される。空文字・空白のみは禁止。最大100文字
 ※ dueDate: 任意（未指定または空文字の場合はnullとして扱う）  
 ※ 形式: YYYY-MM-DD
+※ DB内部ではDATE型で保存し、APIではYYYY-MM-DD文字列として扱う
 
 
 #### レスポンス（成功）
@@ -441,6 +442,7 @@ Authorization: Bearer {token}
 ※ dueDate: 未指定の場合は更新対象外
 ※ dueDate: null の場合は期限削除
 ※ dueDate: 空文字は禁止
+※ DB内部ではDATE型で保存し、APIではYYYY-MM-DD文字列として扱う
 
 #### dueDate の扱い
 

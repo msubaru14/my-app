@@ -1,8 +1,10 @@
 package service
 
+import "time"
+
 type UpdateTaskInput struct {
 	Title      *string
 	DueDateSet bool
-	DueDate    *string
+	DueDate    *time.Time
 	Completed  *bool
 }

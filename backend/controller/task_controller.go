@@ -2,6 +2,7 @@ package controller
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/msubaru14/my-app-backend/dto"
@@ -29,11 +30,17 @@ func (tc *TaskController) CreateTask(c *gin.Context) {
 		return
 	}
 
+	dueDate, err := parseTaskDueDate(input.DueDate)
+	if err != nil {
+		respondAPIError(c, apperror.NewInternalServerError())
+		return
+	}
+
 	userID := c.GetUint("user_id")
 	task := model.Task{
 		Title:     input.Title,
 		Completed: false,
-		DueDate:   input.DueDate,
+		DueDate:   dueDate,
 		UserID:    userID,
 	}
 
@@ -88,10 +95,16 @@ func (tc *TaskController) UpdateTask(c *gin.Context) {
 		return
 	}
 
+	dueDate, err := parseTaskDueDate(input.DueDate.Value)
+	if err != nil {
+		respondAPIError(c, apperror.NewInternalServerError())
+		return
+	}
+
 	updateInput := service.UpdateTaskInput{
 		Title:      input.Title,
 		DueDateSet: input.DueDate.IsSet,
-		DueDate:    input.DueDate.Value,
+		DueDate:    dueDate,
 		Completed:  input.Completed,
 	}
 
@@ -136,4 +149,17 @@ func (tc *TaskController) DeleteTask(c *gin.Context) {
 	}
 
 	response.Success(c, nil)
+}
+
+func parseTaskDueDate(value *string) (*time.Time, error) {
+	if value == nil {
+		return nil, nil
+	}
+
+	parsed, err := time.Parse("2006-01-02", *value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsed, nil
 }
