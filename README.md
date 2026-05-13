@@ -44,6 +44,7 @@ Go、Typescript学習と個人開発のポートフォリオとして作成し�
 - dueDate未指定: 変更なし
 - dueDate: null: 期限削除
 - dueDate: 空文字は禁止
+- dueDateはDB内部ではDATE型、APIではYYYY-MM-DD文字列として扱う
 
 #### 設計意図
 
@@ -121,6 +122,7 @@ feature 外から利用する要素は `features/{feature}/index.ts` を入口�
 - `AutoMigrate` には依存しない（起動時に自動でDDL変更しない）
 - 変更時は Up/Down をセットで管理し、適用順を崩さない
 - 新規環境はマイグレーションのみで構築できる状態を維持する
+- `tasks.due_date` はDB内部ではDATE型とし、API境界では `YYYY-MM-DD | null` として扱う
 
 ## 🔗 API設計（重要ポイント）
 本アプリでは、APIレスポンスを以下の形式に統一しています。  

@@ -20,11 +20,17 @@ type TaskResponse struct {
 }
 
 func NewTaskResponse(task *model.Task) TaskResponse {
+	var dueDate *string
+	if task.DueDate != nil {
+		formatted := task.DueDate.Format("2006-01-02")
+		dueDate = &formatted
+	}
+
 	return TaskResponse{
 		ID:        task.ID,
 		Title:     task.Title,
 		Completed: task.Completed,
-		DueDate:   task.DueDate,
+		DueDate:   dueDate,
 	}
 }
 

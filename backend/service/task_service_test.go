@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/msubaru14/my-app-backend/model"
 	"github.com/msubaru14/my-app-backend/pkg/apperror"
@@ -66,69 +67,69 @@ func TestApplyUpdateTaskInput(t *testing.T) {
 		input         UpdateTaskInput
 		wantTitle     string
 		wantCompleted bool
-		wantDueDate   *string
+		wantDueDate   *time.Time
 	}{
 		{
 			name: "titleだけ指定した場合はtitleだけ更新する",
 			initialTask: model.Task{
 				Title:     "old title",
 				Completed: false,
-				DueDate:   stringPtr("2026-05-10"),
+				DueDate:   datePtr("2026-05-10"),
 			},
 			input: UpdateTaskInput{
 				Title: stringPtr("new title"),
 			},
 			wantTitle:     "new title",
 			wantCompleted: false,
-			wantDueDate:   stringPtr("2026-05-10"),
+			wantDueDate:   datePtr("2026-05-10"),
 		},
 		{
 			name: "completedだけ指定した場合はcompletedだけ更新する",
 			initialTask: model.Task{
 				Title:     "task",
 				Completed: false,
-				DueDate:   stringPtr("2026-05-10"),
+				DueDate:   datePtr("2026-05-10"),
 			},
 			input: UpdateTaskInput{
 				Completed: boolPtr(true),
 			},
 			wantTitle:     "task",
 			wantCompleted: true,
-			wantDueDate:   stringPtr("2026-05-10"),
+			wantDueDate:   datePtr("2026-05-10"),
 		},
 		{
 			name: "dueDateだけ指定した場合はdueDateだけ更新する",
 			initialTask: model.Task{
 				Title:     "task",
 				Completed: false,
-				DueDate:   stringPtr("2026-05-10"),
+				DueDate:   datePtr("2026-05-10"),
 			},
 			input: UpdateTaskInput{
 				DueDateSet: true,
-				DueDate:    stringPtr("2026-05-11"),
+				DueDate:    datePtr("2026-05-11"),
 			},
 			wantTitle:     "task",
 			wantCompleted: false,
-			wantDueDate:   stringPtr("2026-05-11"),
+			wantDueDate:   datePtr("2026-05-11"),
 		},
 		{
 			name: "dueDate未指定の場合は既存値を維持する",
 			initialTask: model.Task{
 				Title:     "task",
 				Completed: false,
-				DueDate:   stringPtr("2026-05-10"),
+				DueDate:   datePtr("2026-05-10"),
 			},
 			input:         UpdateTaskInput{},
 			wantTitle:     "task",
 			wantCompleted: false,
-			wantDueDate:   stringPtr("2026-05-10"),
+			wantDueDate:   datePtr("2026-05-10"),
 		},
 		{
 			name: "dueDateにnilを指定した場合は期限を削除する",
 			initialTask: model.Task{
 				Title:     "task",
 				Completed: false,
-				DueDate:   stringPtr("2026-05-10"),
+				DueDate:   datePtr("2026-05-10"),
 			},
 			input: UpdateTaskInput{
 				DueDateSet: true,
@@ -152,7 +153,7 @@ func TestApplyUpdateTaskInput(t *testing.T) {
 			if task.Completed != tt.wantCompleted {
 				t.Fatalf("expected completed %v, got %v", tt.wantCompleted, task.Completed)
 			}
-			if !equalStringPtr(task.DueDate, tt.wantDueDate) {
+			if !equalTimePtr(task.DueDate, tt.wantDueDate) {
 				t.Fatalf("expected due date %#v, got %#v", tt.wantDueDate, task.DueDate)
 			}
 		})
@@ -363,10 +364,19 @@ func boolPtr(value bool) *bool {
 	return &value
 }
 
-func equalStringPtr(a *string, b *string) bool {
+func datePtr(value string) *time.Time {
+	parsed, err := time.Parse("2006-01-02", value)
+	if err != nil {
+		panic(err)
+	}
+
+	return &parsed
+}
+
+func equalTimePtr(a *time.Time, b *time.Time) bool {
 	if a == nil || b == nil {
 		return a == b
 	}
 
-	return *a == *b
+	return a.Equal(*b)
 }

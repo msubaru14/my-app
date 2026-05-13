@@ -74,6 +74,23 @@ service が HTTP request DTO に依存しすぎないよう、必要な箇所か
 
 ---
 
+## ■ dueDate の扱い
+
+task の `dueDate` は、DB内部では `DATE` 型、Go model では `*time.Time` として扱う。
+
+API request / response では引き続き `YYYY-MM-DD | null` を維持する。
+controller / DTO 境界で `YYYY-MM-DD` 文字列と `time.Time` を変換し、frontend に DB 内部型を露出しない。
+
+方針：
+
+- `POST /tasks` の `dueDate` 未指定 / `null` / 空文字は期限なしとして扱う
+- `PATCH /tasks/:id` の `dueDate` 未指定は更新対象外として扱う
+- `PATCH /tasks/:id` の `dueDate: null` は期限削除として扱う
+- `PATCH /tasks/:id` の `dueDate: ""` は validation error として扱う
+- API response の `dueDate` は `YYYY-MM-DD | null` として返す
+
+---
+
 ## ■ service error の扱い
 
 現時点では service error の一括統一は行わない。

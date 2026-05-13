@@ -144,7 +144,8 @@ Issue #136 の調査結果をもとに、backend には以下の特徴がある�
 - 現在のDBスキーマ定義の正本は migration とする
 - model tag は GORM の CRUD / mapping 用メタ情報として扱う
 - model tag と migration 定義の完全一致は必須条件にしない
-- 現時点で即修正が必要な不整合は見つかっていない
+- `tasks.due_date` は Issue #204 で `DATE` 型へ移行し、API 表現は `YYYY-MM-DD | null` のまま維持する
+- `model.Task.DueDate` は `*time.Time` / `type:date` とし、DTO 境界で `YYYY-MM-DD` 文字列へ変換する
 - `model.Task` の JSON tag、foreign key / association / constraint tag、`not null` tag 明示要否は必要に応じて別Issueで扱う
 
 ---
@@ -453,7 +454,7 @@ controller ごとの error response 組み立て：
 - `users.name` / `users.email` / `users.password` は model の `size:255;not null` と migration の `VARCHAR(255) NOT NULL` が一致している
 - `users.email` は model の `uniqueIndex` と migration の unique index が一致している
 - `tasks.completed` は model の `default:false` と migration の `BOOLEAN NOT NULL DEFAULT FALSE` が整合している
-- `tasks.due_date` は model の `*string` / `type:text` と migration の nullable `TEXT` が整合している
+- `tasks.due_date` は Issue #204 で migration の nullable `DATE` と model の `*time.Time` / `type:date` を整合させた
 - `tasks.user_id` は model の `not null;index` と migration の `BIGINT NOT NULL` / index が整合している
 - `gorm.Model` 由来の `deleted_at` は migration 側にも index がある
 
