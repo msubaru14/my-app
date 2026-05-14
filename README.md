@@ -271,6 +271,42 @@ docker compose up --build -d
 
 デプロイ時も、API仕様・認証挙動・DBスキーマを変更しない方針を維持します。
 
+### デプロイ前提の環境変数
+
+詳細は [deploy preflight notes](./docs/deploy-preflight.md) を参照してください。
+
+Frontend は Vite 標準の environment variable で API URL を切り替えます。
+
+```env
+VITE_API_BASE_URL=https://your-render-backend.example.com
+```
+
+未設定時は local development 用に `http://localhost:8080` を使用します。
+
+Backend は production frontend origin を CORS 許可 origin として設定します。
+
+```env
+FRONTEND_URL=https://your-vercel-frontend.example.com
+GIN_MODE=release
+```
+
+DB 接続は現時点では `DATABASE_URL` ではなく、以下の分割 environment variables を使用します。
+
+```env
+DB_HOST=your-neon-host
+DB_PORT=5432
+DB_USER=your-neon-user
+DB_PASSWORD=your-neon-password
+DB_NAME=your-neon-database
+```
+
+`DATABASE_URL` 対応は backend の DB 接続責務変更を伴うため、別 Issue で扱います。
+
+### マイグレーション
+
+Backend 起動時に `backend/db/migrations` 配下の migration が順に実行されます。
+Neon 初期 DB では、Render backend 起動時に DB 接続が成功すれば migration が適用されます。
+
 
 ## 📄 ライセンス
 MIT
