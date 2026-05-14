@@ -1,7 +1,7 @@
 # Deploy Preflight Notes
 
-Issue #206 では、deploy 実施前の env、CORS、production build、migration 実行方式を確認する。
-実deploy、DB schema変更、API仕様変更、backendの `DATABASE_URL` 対応は扱わない。
+Issue #206 / #208 では、deploy 実施前の env、CORS、production build、migration 実行方式を確認する。
+実deploy、DB schema変更、API仕様変更は扱わない。
 
 ## Frontend
 
@@ -21,15 +21,21 @@ Render では以下の environment variables を設定する。
 FRONTEND_URL=https://your-vercel-frontend.example.com
 GIN_MODE=release
 JWT_SECRET=your-secret
-DB_HOST=your-neon-host
-DB_PORT=5432
-DB_USER=your-neon-user
-DB_PASSWORD=your-neon-password
-DB_NAME=your-neon-database
+DATABASE_URL=postgresql://your-neon-user:your-neon-password@your-neon-host/your-neon-database?sslmode=require
 ```
 
-現在の backend は `DATABASE_URL` ではなく、`DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` から DB 接続 DSN を組み立てる。
-`DATABASE_URL` 対応は DB 接続責務の変更を伴うため、別 Issue で扱う。
+Production deploy では `DATABASE_URL` を DB 接続 DSN として使用する。
+`DATABASE_URL` が未設定の場合は、local Docker development 用に `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` から DSN を組み立てる。
+
+Local Docker development では以下の分割 environment variables を引き続き使用する。
+
+```env
+DB_HOST=db
+DB_PORT=5432
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=mydb
+```
 
 ## CORS
 
@@ -50,4 +56,5 @@ Deploy 前に以下を確認する。
 - `VITE_API_BASE_URL` 未設定時に localhost fallback する
 - `VITE_API_BASE_URL` 設定時に API URL が切り替わる
 - Render の `FRONTEND_URL` に Vercel origin を設定できる
-- DB 接続 env は現状の分割 env 方式で整理されている
+- Production DB 接続では `DATABASE_URL` を設定できる
+- `DATABASE_URL` 未設定時は分割 env 方式に fallback する
