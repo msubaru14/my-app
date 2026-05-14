@@ -290,17 +290,21 @@ FRONTEND_URL=https://your-vercel-frontend.example.com
 GIN_MODE=release
 ```
 
-DB 接続は現時点では `DATABASE_URL` ではなく、以下の分割 environment variables を使用します。
+Production DB 接続では `DATABASE_URL` を使用します。
 
 ```env
-DB_HOST=your-neon-host
-DB_PORT=5432
-DB_USER=your-neon-user
-DB_PASSWORD=your-neon-password
-DB_NAME=your-neon-database
+DATABASE_URL=postgresql://your-neon-user:your-neon-password@your-neon-host/your-neon-database?sslmode=require
 ```
 
-`DATABASE_URL` 対応は backend の DB 接続責務変更を伴うため、別 Issue で扱います。
+`DATABASE_URL` が未設定の場合、local Docker 開発用に以下の分割 environment variables から DB 接続 DSN を組み立てます。
+
+```env
+DB_HOST=db
+DB_PORT=5432
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=mydb
+```
 
 ### マイグレーション
 
