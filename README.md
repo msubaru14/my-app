@@ -3,6 +3,11 @@
 
 ## 🚀 デモ
 
+Production URL:
+
+- Frontend: https://my-task-app-psi-seven.vercel.app
+- Backend API: https://my-app-backend-uugs.onrender.com
+
 | ![registration](./docs/registration.png) | ![login](./docs/login.png) | ![task_list](./docs/task_list.png) | ![task_update](./docs/task_update.png) |
 | :---------------------: | :------------: | :---------------------: | :------------: |
 | ユーザ登録 | ログイン | タスク一覧 | タスク編集 |
@@ -80,7 +85,8 @@ HTTP PATCHの思想に沿い、フロントからの差分更新に柔軟に対�
 - PostgreSQL
 
 ### Infrastructure
-- Docker / Docker Compose
+- Local: Docker / Docker Compose
+- Production: Vercel / Render / Neon
 
 ## 🏗 アーキテクチャ
 レイヤードアーキテクチャを採用し、責務を分離
@@ -172,6 +178,27 @@ cd my-app
 ### 2. 環境変数設定
 ```bash
 cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+local development では以下を使用します。
+
+```env
+# frontend/.env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+```env
+# backend/.env
+JWT_SECRET=mysecret
+FRONTEND_URL=http://localhost:5173
+GIN_MODE=debug
+
+DB_HOST=db
+DB_PORT=5432
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=mydb
 ```
 
 ### 3. 起動
@@ -228,9 +255,7 @@ docker compose up --build -d
 
 
 ## 🚧 今後の予定
-- TaskService など業務ルールが多い箇所から unit test を小さく追加
-- service input 導入による request DTO 依存の整理
-- 無料PaaS構成でのデプロイ
+- production 運用時のログ・監視方針の整理
 - 必要に応じたUI/UX改善
 
 
@@ -259,26 +284,31 @@ docker compose up --build -d
 - backend の責務分離方針を説明できる
 - frontend の feature 分割と error handling 方針を説明できる
 - TaskService など重要な業務ルールに unit test を小さく導入している
-- 無料PaaS構成でデプロイできる状態になっている
+- 無料PaaS構成で production deploy 済みである
 
-## ☁️ デプロイ方針
+## ☁️ デプロイ構成
 
-ポートフォリオとして公開しやすいよう、無料枠で始められるPaaS構成を想定します。
+ポートフォリオとして公開しやすいよう、無料枠で始められるPaaS構成で deploy しています。
 
 - Frontend: Vercel
 - Backend: Render
 - Database: Neon
 
-デプロイ時も、API仕様・認証挙動・DBスキーマを変更しない方針を維持します。
+Production 環境でも、API仕様・認証挙動・DBスキーマを変更しない方針を維持しています。
 
-### デプロイ前提の環境変数
+### Production URL
 
-詳細は [deploy preflight notes](./docs/deploy-preflight.md) を参照してください。
+- Frontend: https://my-task-app-psi-seven.vercel.app
+- Backend API: https://my-app-backend-uugs.onrender.com
+
+### Production 環境変数
+
+詳細は [production deploy notes](./docs/deploy-preflight.md) を参照してください。
 
 Frontend は Vite 標準の environment variable で API URL を切り替えます。
 
 ```env
-VITE_API_BASE_URL=https://your-render-backend.example.com
+VITE_API_BASE_URL=https://my-app-backend-uugs.onrender.com
 ```
 
 未設定時は local development 用に `http://localhost:8080` を使用します。
@@ -286,7 +316,7 @@ VITE_API_BASE_URL=https://your-render-backend.example.com
 Backend は production frontend origin を CORS 許可 origin として設定します。
 
 ```env
-FRONTEND_URL=https://your-vercel-frontend.example.com
+FRONTEND_URL=https://my-task-app-psi-seven.vercel.app
 GIN_MODE=release
 ```
 
@@ -310,6 +340,17 @@ DB_NAME=mydb
 
 Backend 起動時に `backend/db/migrations` 配下の migration が順に実行されます。
 Neon 初期 DB では、Render backend 起動時に DB 接続が成功すれば migration が適用されます。
+
+### Production 動作確認
+
+Production 環境で以下を確認済みです。
+
+- ユーザー登録 / ログイン / ログアウト
+- タスク作成 / 一覧取得 / 更新 / 完了切替 / 削除
+- validation error 表示
+- unauthorized redirect
+- Vercel SPA routing
+- browser console に致命的 error がないこと
 
 
 ## 📄 ライセンス
