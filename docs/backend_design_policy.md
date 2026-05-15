@@ -167,13 +167,13 @@ unit test は一括導入せず、業務ルールが多い箇所から小さく�
 - backend の責務分離方針を説明できる
 - frontend の feature 分割と error handling 方針を説明できる
 - TaskService など重要な業務ルールに unit test を小さく導入している
-- 無料PaaS構成でデプロイできる状態になっている
+- 無料PaaS構成で production deploy 済みである
 
 ---
 
 ## ■ デプロイ方針
 
-ポートフォリオとして公開しやすいよう、無料枠で始められるPaaS構成を想定する。
+ポートフォリオとして公開しやすいよう、無料枠で始められるPaaS構成で deploy している。
 
 - Frontend: Vercel
 - Backend: Render
@@ -183,10 +183,7 @@ unit test は一括導入せず、業務ルールが多い箇所から小さく�
 
 ---
 
-## ■ 次の進め方
+## ■ 今後の改善候補
 
-1. `TaskService.UpdateTask` の service input 導入要否を検討する
-2. TaskService から unit test を小さく導入する
-3. unit test 導入時に repository interface の必要性を確認する
-4. service error 方針に基づき、実装変更が必要な箇所が出た場合は個別 Issue で扱う
-5. user / auth validation helper 分離の必要性を確認する
+1. service error 方針に基づき、実装変更が必要な箇所が出た場合は個別 Issue で扱う
+2. user / auth validation helper 分離の必要性を確認する

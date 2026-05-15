@@ -2,6 +2,14 @@
 
 ## ベースURL
 
+Production:
+
+```
+https://my-app-backend-uugs.onrender.com
+```
+
+Local development:
+
 ```
 http://localhost:8080
 ```

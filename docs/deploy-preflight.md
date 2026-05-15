@@ -1,24 +1,39 @@
-# Deploy Preflight Notes
+# Production Deploy Notes
 
-Issue #206 / #208 では、deploy 実施前の env、CORS、production build、migration 実行方式を確認する。
-実deploy、DB schema変更、API仕様変更は扱わない。
+production deploy の前提、環境変数、CORS、migration 実行方式、動作確認結果をまとめる。
+実際の secret / password / full `DATABASE_URL` は記載しない。
+
+## Production Structure
+
+```txt
+Frontend: Vercel
+Backend: Render
+Database: Neon
+```
+
+Production URL:
+
+- Frontend: https://my-task-app-psi-seven.vercel.app
+- Backend API: https://my-app-backend-uugs.onrender.com
 
 ## Frontend
 
 Vercel では以下の environment variable を設定する。
 
 ```env
-VITE_API_BASE_URL=https://your-render-backend.example.com
+VITE_API_BASE_URL=https://my-app-backend-uugs.onrender.com
 ```
 
 未設定時は local development 用に `http://localhost:8080` を使用する。
+
+Vercel では `frontend/vercel.json` により、`/login` / `/register` / `/tasks` などの direct access / reload を SPA に rewrite する。
 
 ## Backend
 
 Render では以下の environment variables を設定する。
 
 ```env
-FRONTEND_URL=https://your-vercel-frontend.example.com
+FRONTEND_URL=https://my-task-app-psi-seven.vercel.app
 GIN_MODE=release
 JWT_SECRET=your-secret
 DATABASE_URL=postgresql://your-neon-user:your-neon-password@your-neon-host/your-neon-database?sslmode=require
@@ -40,16 +55,16 @@ DB_NAME=mydb
 ## CORS
 
 Backend の CORS は `FRONTEND_URL` を許可 origin として使用する。
-Production deploy 時は、Render の `FRONTEND_URL` に Vercel の production origin を設定する。
+Render の `FRONTEND_URL` には Vercel の production origin を設定する。
 
 ## Migration
 
 Backend 起動時に `db.RunMigrations` が実行され、`backend/db/migrations` 配下の SQL が順に適用される。
 Neon 初期 DB では、Render backend 起動時に DB 接続が成功すれば migration が実行される。
 
-## Preflight Checks
+## Deploy Checks
 
-Deploy 前に以下を確認する。
+deploy フェーズで以下を確認済み。
 
 - `frontend` の production build が成功する
 - `backend` の build と起動確認が成功する
@@ -58,3 +73,23 @@ Deploy 前に以下を確認する。
 - Render の `FRONTEND_URL` に Vercel origin を設定できる
 - Production DB 接続では `DATABASE_URL` を設定できる
 - `DATABASE_URL` 未設定時は分割 env 方式に fallback する
+- Neon DB に `schema_migrations` / `users` / `tasks` が作成される
+- Render backend が production API として HTTP 応答する
+- Vercel frontend から Render backend / Neon DB と連携して操作できる
+
+## Production UI Checks
+
+production 環境で以下を確認済み。
+
+- register
+- login
+- logout
+- task 作成
+- task 一覧取得
+- task 更新
+- task 完了切替
+- task 削除
+- validation error 表示
+- unauthorized redirect
+- Vercel SPA routing
+- browser console に致命的 error がないこと
