@@ -70,7 +70,7 @@ export const TaskList = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     clearUser();
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   if (!token) {
